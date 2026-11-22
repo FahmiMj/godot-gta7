@@ -3,11 +3,13 @@ extends CharacterBody2D
 ##
 ## Animations are named "<state>_<facing>", e.g. walk_left / idle_up.
 ## The sprite sheet has 5 rows: down, up, left, right, idle.
-## Q flash steps forward, E hurls dark fire toward the cursor.
+## Q flash steps forward, E conjures and hurls dark fire toward the cursor.
 
 const TRAIL_SHADER := preload("res://assets/shaders/flash_step_trail.gdshader")
-const DarkFire := preload("res://scripts/dark_fire.gd")
 const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
+
+## The cast animation faces right, so a leftward throw only flips the sprite.
+const HAND_OFFSET := Vector2(64.0, -71.0)
 
 @export var speed: float = 200.0
 ## How far a flash step teleports, in pixels.
@@ -19,15 +21,14 @@ const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
 ## How long each afterimage takes to fade out, in seconds.
 @export var flash_step_trail_fade: float = 0.3
 ## Time between dark fire throws, in seconds.
-@export var attack_cooldown: float = 0.45
-## How long the flame is conjured in the hand before the throw, in seconds.
-@export var cast_time: float = 0.22
+@export var attack_cooldown: float = 1.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var flash_step_sound: AudioStreamPlayer = $FlashStepSound
 
 var _facing: String = "down"
 var _flash_stepping: bool = false
+var _casting: bool = false
 var _attack_cooldown_left: float = 0.0
 var _trail_material: ShaderMaterial
 
@@ -44,6 +45,10 @@ func _physics_process(delta: float) -> void:
 
 	velocity = input_dir * speed
 	move_and_slide()
+
+	# the spell animation owns the sprite until the throw and recovery finish
+	if _casting:
+		return
 
 	if input_dir == Vector2.ZERO:
 		_play("idle")
@@ -66,7 +71,7 @@ func _play(state: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("flash_step") and not _flash_stepping:
 		_flash_step()
-	elif event.is_action_pressed("attack") and _attack_cooldown_left <= 0.0:
+	elif event.is_action_pressed("attack") and _attack_cooldown_left <= 0.0 and not _casting:
 		_attack()
 
 
@@ -114,28 +119,27 @@ func _spawn_trail() -> void:
 		tween.tween_callback(ghost.queue_free)
 
 
-## Conjures dark fire in the hand, then hurls it at the cursor.
+## Plays the conjure animation and releases the ball when the hand is thrust out.
 func _attack() -> void:
+	_casting = true
 	_attack_cooldown_left = attack_cooldown
 
-	var hand_offset := _facing_vector() * 26.0 + Vector2(0.0, -70.0)
-	var flame := DarkFire.make_flame_sprite(Vector2(0.5, 0.7))
-	flame.name = "HandFlame"
-	flame.position = hand_offset
-	flame.rotation = _facing_vector().angle() + PI * 0.5
-	add_child(flame)
+	var aim := get_global_mouse_position() - global_position
+	sprite.flip_h = aim.x < -4.0
 
-	# the flame swells in the hand while it is being conjured
-	var tween := create_tween()
-	tween.tween_property(flame, "scale", Vector2(0.8, 1.05), cast_time * 0.8)
-	tween.parallel().tween_property(flame, "modulate:a", 1.0, cast_time * 0.5)
+	sprite.play("cast")
+	await sprite.animation_finished
+	_throw_dark_fire(_hand_position())
 
-	await get_tree().create_timer(cast_time).timeout
-	if not is_instance_valid(flame):
-		return
-	var spawn_position := flame.global_position
-	flame.queue_free()
-	_throw_dark_fire(spawn_position)
+	sprite.play("cast_recover")
+	await sprite.animation_finished
+	sprite.flip_h = false
+	_casting = false
+
+
+## World position of the fireball in the release pose, mirrored for left throws.
+func _hand_position() -> Vector2:
+	return global_position + Vector2(-HAND_OFFSET.x if sprite.flip_h else HAND_OFFSET.x, HAND_OFFSET.y)
 
 
 func _throw_dark_fire(spawn_position: Vector2) -> void:

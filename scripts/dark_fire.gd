@@ -1,8 +1,13 @@
 extends Node2D
-## Dark fire ball. Travels toward a target point, flickering with a purple
-## additive glow and a smoky trail, then bursts into embers.
+## The dark fire ball thrown by the player.
+##
+## The ball itself is the mage's own fire art from the attack sheet, wrapped in
+## a warm additive glow, trailing embers, and bursting when it has flown far
+## enough.
 
-const TEXTURE_SIZE := 48
+const BALL_TEXTURE := preload("res://assets/sprites/dark_fire_ball.png")
+const CORE_SCALE := 0.5
+const GLOW_SIZE := 32
 
 @export var speed: float = 620.0
 @export var max_distance: float = 1400.0
@@ -12,27 +17,26 @@ var _travelled: float = 0.0
 var _time: float = 0.0
 var _core: Sprite2D
 
-static var _flame_texture: Texture2D
+static var _glow_texture: Texture2D
 
 
-## Soft violet blob with a white-hot centre, generated once and shared.
-static func flame_texture() -> Texture2D:
-	if _flame_texture != null:
-		return _flame_texture
+## Soft orange-white ember used for the halo, light and particles.
+static func glow_texture() -> Texture2D:
+	if _glow_texture != null:
+		return _glow_texture
 
-	var image := Image.create(TEXTURE_SIZE, TEXTURE_SIZE, false, Image.FORMAT_RGBA8)
-	for y in TEXTURE_SIZE:
-		for x in TEXTURE_SIZE:
-			var uv := (Vector2(x, y) + Vector2(0.5, 0.5)) / float(TEXTURE_SIZE) * 2.0 - Vector2.ONE
+	var image := Image.create(GLOW_SIZE, GLOW_SIZE, false, Image.FORMAT_RGBA8)
+	for y in GLOW_SIZE:
+		for x in GLOW_SIZE:
+			var uv := (Vector2(x, y) + Vector2(0.5, 0.5)) / float(GLOW_SIZE) * 2.0 - Vector2.ONE
 			var distance := uv.length()
-			var edge := 1.0 + 0.18 * sin(uv.x * 9.0 + uv.y * 7.0)
-			var alpha := pow(clampf(1.0 - distance / edge, 0.0, 1.0), 2.0)
-			var core := clampf(1.0 - distance * 1.7, 0.0, 1.0)
-			var color := Color(0.45, 0.08, 0.8).lerp(Color(1.0, 0.9, 1.0), pow(core, 3.0))
+			var alpha := pow(clampf(1.0 - distance, 0.0, 1.0), 2.2)
+			var hot := pow(clampf(1.0 - distance * 2.0, 0.0, 1.0), 3.0)
+			var color := Color(1.0, 0.3, 0.04).lerp(Color(1.0, 0.95, 0.7), hot)
 			color.a = alpha
 			image.set_pixel(x, y, color)
-	_flame_texture = ImageTexture.create_from_image(image)
-	return _flame_texture
+	_glow_texture = ImageTexture.create_from_image(image)
+	return _glow_texture
 
 
 static func additive_material() -> CanvasItemMaterial:
@@ -41,47 +45,50 @@ static func additive_material() -> CanvasItemMaterial:
 	return material
 
 
-## A ready-to-use glowing flame sprite; callers own and free it.
-static func make_flame_sprite(flame_scale: Vector2) -> Sprite2D:
-	var flame := Sprite2D.new()
-	flame.texture = flame_texture()
-	flame.scale = flame_scale
-	flame.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	flame.material = additive_material()
-	return flame
-
-
 ## Aims the ball at a world-space point.
 func setup(target: Vector2) -> void:
 	var offset := target - global_position
 	_direction = Vector2.RIGHT if offset.length_squared() < 0.01 else offset.normalized()
-	rotation = _direction.angle() + PI * 0.5
+	rotation = _direction.angle()
 
 
 func _ready() -> void:
-	_core = make_flame_sprite(Vector2(0.9, 1.3))
+	var glow := Sprite2D.new()
+	glow.name = "Glow"
+	glow.texture = glow_texture()
+	glow.scale = Vector2(2.6, 2.6)
+	glow.modulate = Color(1.0, 0.62, 0.25, 0.8)
+	glow.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	glow.material = additive_material()
+	add_child(glow)
+
+	_core = Sprite2D.new()
 	_core.name = "Core"
+	_core.texture = BALL_TEXTURE
+	_core.scale = Vector2(CORE_SCALE, CORE_SCALE)
+	_core.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	add_child(_core)
 
 	var light := PointLight2D.new()
-	light.texture = flame_texture()
-	light.color = Color(0.62, 0.28, 1.0)
-	light.energy = 1.2
-	light.scale = Vector2(3.0, 3.0)
+	light.texture = glow_texture()
+	light.color = Color(1.0, 0.55, 0.18)
+	light.energy = 1.4
+	light.scale = Vector2(3.5, 3.5)
 	add_child(light)
 
 	var trail := CPUParticles2D.new()
-	trail.texture = flame_texture()
-	trail.amount = 20
-	trail.lifetime = 0.4
+	trail.name = "Trail"
+	trail.texture = glow_texture()
+	trail.amount = 24
+	trail.lifetime = 0.35
 	trail.local_coords = false
 	trail.direction = Vector2.LEFT
-	trail.spread = 180.0
-	trail.initial_velocity_min = 10.0
-	trail.initial_velocity_max = 45.0
-	trail.scale_amount_min = 0.15
-	trail.scale_amount_max = 0.4
-	trail.color = Color(0.55, 0.2, 0.95, 0.5)
+	trail.spread = 30.0
+	trail.initial_velocity_min = 20.0
+	trail.initial_velocity_max = 70.0
+	trail.scale_amount_min = 0.2
+	trail.scale_amount_max = 0.45
+	trail.color = Color(1.0, 0.4, 0.1, 0.7)
 	trail.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	trail.material = additive_material()
 	trail.emitting = true
@@ -93,10 +100,10 @@ func _physics_process(delta: float) -> void:
 	var step := speed * delta
 	position += _direction * step
 	_travelled += step
-	rotation = _direction.angle() + PI * 0.5
+	rotation = _direction.angle()
 
 	if _core != null:
-		_core.scale = Vector2(0.9, 1.3) * (1.0 + 0.1 * sin(_time * 42.0))
+		_core.scale = Vector2(CORE_SCALE, CORE_SCALE) * (1.0 + 0.06 * sin(_time * 34.0))
 
 	if _travelled >= max_distance:
 		_burst()
@@ -105,9 +112,9 @@ func _physics_process(delta: float) -> void:
 func _burst() -> void:
 	var burst := CPUParticles2D.new()
 	burst.name = "DarkFireBurst"
-	burst.texture = flame_texture()
+	burst.texture = glow_texture()
 	burst.one_shot = true
-	burst.amount = 26
+	burst.amount = 28
 	burst.lifetime = 0.5
 	burst.explosiveness = 1.0
 	burst.spread = 180.0
@@ -115,7 +122,7 @@ func _burst() -> void:
 	burst.initial_velocity_max = 230.0
 	burst.scale_amount_min = 0.2
 	burst.scale_amount_max = 0.5
-	burst.color = Color(0.6, 0.25, 1.0, 0.85)
+	burst.color = Color(1.0, 0.45, 0.12, 0.9)
 	burst.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	burst.material = additive_material()
 	get_parent().add_child(burst)
