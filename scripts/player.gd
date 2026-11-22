@@ -4,7 +4,7 @@ extends CharacterBody2D
 ## Animations are named "<state>_<facing>", e.g. walk_left / idle_up.
 ## The sprite sheet has 5 rows: down, up, left, right, idle.
 
-@export var speed: float = 150.0
+@export var speed: float = 200.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
