@@ -23,7 +23,7 @@
 
 ## 🧠 What is this?
 
-A whole open-world crime saga. In Godot. For free. Built by two guys and a coffee machine.
+A whole open-world crime saga. In Godot. For free. Built by two guys and a lady.
 
 Rockstar has a budget of roughly *one billion dollars*. We have:
 - Godot 4.7.2
