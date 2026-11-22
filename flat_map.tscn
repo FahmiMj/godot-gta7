@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/arena_map.png" id="1_map"]
 [ext_resource type="Script" path="res://scripts/torch_flicker.gd" id="2_flicker"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
 
 [sub_resource type="Gradient" id="Gradient_light"]
 offsets = PackedFloat32Array(0, 0.42, 0.78, 1)
@@ -20,6 +21,8 @@ fill_to = Vector2(0.5, 0)
 [node name="Ground" type="Sprite2D" parent="."]
 texture = ExtResource("1_map")
 texture_filter = 1
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
 
 [node name="Darkness" type="CanvasModulate" parent="."]
 color = Color(0.5, 0.5, 0.57, 1)
@@ -55,6 +58,3 @@ energy = 1.18
 texture = SubResource("GradientTexture2D_light")
 texture_scale = 3.0
 script = ExtResource("2_flicker")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.25, 0.25)
