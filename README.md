@@ -66,8 +66,8 @@ Rockstar has a budget of roughly *one billion dollars*. We have:
 
 ```bash
 # clone the masterpiece
-git clone https://github.com/FahmiMj/gta7-godot.git
-cd gta7-godot
+git clone https://github.com/FahmiMj/godot-gta7.git
+cd godot-gta7
 
 # open in Godot 4.7+
 godot --editor .
@@ -130,7 +130,7 @@ You stand still and the police forget you exist. That's not a bug, that's a life
 ## 📁 Project Structure
 
 ```
-gta7-godot/
+godot-gta7/
 ├── gta7-plans      # the sacred roadmap
 └── README.md       # you are here
 ```
@@ -164,6 +164,6 @@ No license. Do whatever. If you get rich, remember us twin.
 
 *Made with 💙, GDScript, and delusion*
 
-![Visitors](https://api.visitorbadge.io/api/visitors?path=FahmiMj.gta7-godot&label=people%20who%20believed&countColor=%23478CBF)
+![Visitors](https://api.visitorbadge.io/api/visitors?path=FahmiMj.godot-gta7&label=people%20who%20believed&countColor=%23478CBF)
 
 </div>
