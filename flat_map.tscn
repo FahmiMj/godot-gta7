@@ -77,3 +77,6 @@ text = "HP: 200 / 200"
 
 [node name="DamageButton" type="Button" parent="DebugUI/Panel/VBox"]
 text = "Take 50 Damage"
+
+[node name="ReviveButton" type="Button" parent="DebugUI/Panel/VBox"]
+text = "Revive"

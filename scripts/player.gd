@@ -35,6 +35,7 @@ var _facing: String = "down"
 var _flash_stepping: bool = false
 var _casting: bool = false
 var _dead: bool = false
+var _reviving: bool = false
 var _attack_cooldown_left: float = 0.0
 var _trail_material: ShaderMaterial
 
@@ -90,7 +91,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func take_damage(amount: int) -> void:
-	if _dead:
+	if _dead or _reviving:
 		return
 	health = maxi(0, health - amount)
 	health_changed.emit(health, max_health)
@@ -109,8 +110,25 @@ func _die() -> void:
 	died.emit()
 	await sprite.animation_finished
 	# hold the final withered frame
-	sprite.frame = sprite.sprite_frames.get_frame_count("wither") - 1
-	sprite.pause()
+	if _dead:
+		sprite.frame = sprite.sprite_frames.get_frame_count("wither") - 1
+		sprite.pause()
+
+
+func revive() -> void:
+	if not _dead or _reviving:
+		return
+	_reviving = true
+	sprite.flip_h = false
+	sprite.play_backwards("wither")
+	await sprite.animation_finished
+	health = max_health
+	_dead = false
+	_reviving = false
+	_casting = false
+	_facing = "down"
+	health_changed.emit(health, max_health)
+	_play("idle")
 
 
 ## Vanishes for a moment, reappears flash_step_distance ahead in the facing direction.
