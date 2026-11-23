@@ -11,7 +11,7 @@ const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
 ## The cast animation faces right, so a leftward throw only flips the sprite.
 const HAND_OFFSET := Vector2(64.0, -71.0)
 
-@export var speed: float = 200.0
+@export var speed: float = 400.0
 ## How far a flash step teleports, in pixels.
 @export var flash_step_distance: float = 300.0
 ## How long the sprite stays invisible mid-flash-step, in seconds.
