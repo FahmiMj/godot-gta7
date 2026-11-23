@@ -9,4 +9,4 @@ script = ExtResource("1_spw")
 enemy_scene = ExtResource("2_enemy")
 treasure_scene = ExtResource("3_box")
 enemy_count = 3
-spawn_spread = 24.0
+spawn_spread = 120.0
