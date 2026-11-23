@@ -160,8 +160,6 @@ region = Rect2(384, 192, 128, 192)
 atlas = ExtResource("1_w1ope")
 region = Rect2(512, 192, 128, 192)
 
-[resource]
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_wither_0"]
 atlas = ExtResource("2_wither")
 region = Rect2(0, 0, 128, 192)
@@ -221,8 +219,8 @@ region = Rect2(384, 384, 128, 192)
 [sub_resource type="AtlasTexture" id="AtlasTexture_wither_14"]
 atlas = ExtResource("2_wither")
 region = Rect2(512, 384, 128, 192)
+[resource]
 animations = [{
-{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_wither_0")
@@ -272,7 +270,7 @@ animations = [{
 "loop": false,
 "name": &"wither",
 "speed": 10.0
-}, 
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_7jahb")
