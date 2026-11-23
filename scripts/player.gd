@@ -12,6 +12,7 @@ const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
 const HAND_OFFSET := Vector2(64.0, -71.0)
 
 @export var speed: float = 400.0
+@export var max_health: int = 200
 ## How far a flash step teleports, in pixels.
 @export var flash_step_distance: float = 300.0
 ## How long the sprite stays invisible mid-flash-step, in seconds.
@@ -23,23 +24,34 @@ const HAND_OFFSET := Vector2(64.0, -71.0)
 ## Time between dark fire throws, in seconds.
 @export var attack_cooldown: float = 1.0
 
+signal health_changed(current: int, maximum: int)
+signal died
+
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var flash_step_sound: AudioStreamPlayer = $FlashStepSound
 
+var health: int = 200
 var _facing: String = "down"
 var _flash_stepping: bool = false
 var _casting: bool = false
+var _dead: bool = false
 var _attack_cooldown_left: float = 0.0
 var _trail_material: ShaderMaterial
 
 
 func _ready() -> void:
+	health = max_health
 	_trail_material = ShaderMaterial.new()
 	_trail_material.shader = TRAIL_SHADER
+	health_changed.emit(health, max_health)
 
 
 func _physics_process(delta: float) -> void:
 	_attack_cooldown_left = maxf(0.0, _attack_cooldown_left - delta)
+
+	if _dead:
+		velocity = Vector2.ZERO
+		return
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 
@@ -69,10 +81,36 @@ func _play(state: String) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _dead:
+		return
 	if event.is_action_pressed("flash_step") and not _flash_stepping:
 		_flash_step()
 	elif event.is_action_pressed("attack") and _attack_cooldown_left <= 0.0 and not _casting:
 		_attack()
+
+
+func take_damage(amount: int) -> void:
+	if _dead:
+		return
+	health = maxi(0, health - amount)
+	health_changed.emit(health, max_health)
+	if health <= 0:
+		_die()
+
+
+func _die() -> void:
+	if _dead:
+		return
+	_dead = true
+	_casting = false
+	velocity = Vector2.ZERO
+	sprite.flip_h = false
+	sprite.play("wither")
+	died.emit()
+	await sprite.animation_finished
+	# hold the final withered frame
+	sprite.frame = sprite.sprite_frames.get_frame_count("wither") - 1
+	sprite.pause()
 
 
 ## Vanishes for a moment, reappears flash_step_distance ahead in the facing direction.

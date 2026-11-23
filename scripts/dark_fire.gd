@@ -20,7 +20,7 @@ var _core: Sprite2D
 static var _glow_texture: Texture2D
 
 
-## Soft orange-white ember used for the halo, light and particles.
+## Soft purple-white ember used for the halo, light and particles.
 static func glow_texture() -> Texture2D:
 	if _glow_texture != null:
 		return _glow_texture
@@ -32,7 +32,7 @@ static func glow_texture() -> Texture2D:
 			var distance := uv.length()
 			var alpha := pow(clampf(1.0 - distance, 0.0, 1.0), 2.2)
 			var hot := pow(clampf(1.0 - distance * 2.0, 0.0, 1.0), 3.0)
-			var color := Color(1.0, 0.3, 0.04).lerp(Color(1.0, 0.95, 0.7), hot)
+			var color := Color(0.55, 0.2, 1.0).lerp(Color(0.95, 0.85, 1.0), hot)
 			color.a = alpha
 			image.set_pixel(x, y, color)
 	_glow_texture = ImageTexture.create_from_image(image)
@@ -57,7 +57,7 @@ func _ready() -> void:
 	glow.name = "Glow"
 	glow.texture = glow_texture()
 	glow.scale = Vector2(2.6, 2.6)
-	glow.modulate = Color(1.0, 0.62, 0.25, 0.8)
+	glow.modulate = Color(0.7, 0.45, 1.0, 0.8)
 	glow.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	glow.material = additive_material()
 	add_child(glow)
@@ -71,7 +71,7 @@ func _ready() -> void:
 
 	var light := PointLight2D.new()
 	light.texture = glow_texture()
-	light.color = Color(1.0, 0.55, 0.18)
+	light.color = Color(0.65, 0.35, 1.0)
 	light.energy = 1.4
 	light.scale = Vector2(3.5, 3.5)
 	add_child(light)
@@ -88,7 +88,7 @@ func _ready() -> void:
 	trail.initial_velocity_max = 70.0
 	trail.scale_amount_min = 0.2
 	trail.scale_amount_max = 0.45
-	trail.color = Color(1.0, 0.4, 0.1, 0.7)
+	trail.color = Color(0.7, 0.35, 1.0, 0.7)
 	trail.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	trail.material = additive_material()
 	trail.emitting = true
@@ -122,7 +122,7 @@ func _burst() -> void:
 	burst.initial_velocity_max = 230.0
 	burst.scale_amount_min = 0.2
 	burst.scale_amount_max = 0.5
-	burst.color = Color(1.0, 0.45, 0.12, 0.9)
+	burst.color = Color(0.75, 0.4, 1.0, 0.9)
 	burst.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	burst.material = additive_material()
 	get_parent().add_child(burst)
