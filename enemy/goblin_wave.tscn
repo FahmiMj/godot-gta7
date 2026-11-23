@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://d12b2qs0y3a0"]
+
+[ext_resource type="Script" path="res://enemy/goblin_wave.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c5spw7n3q9x2h" path="res://enemy/spawner.tscn" id="2_spawner"]
+
+[node name="GoblinWave" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="SpawnPoint1" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(-150, -150)
+
+[node name="SpawnPoint2" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(150, -150)
+
+[node name="SpawnPoint3" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(-150, 150)
+
+[node name="SpawnPoint4" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(150, 150)
+
+[node name="Spawner" parent="." instance=ExtResource("2_spawner")]

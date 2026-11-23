@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://b6rlh3r0x7q2d"]
+
+[ext_resource type="Script" path="res://sandbox/hunter/test_real_hero.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://flat_map.tscn" id="2_map"]
+[ext_resource type="PackedScene" uid="uid://c5spw7n3q9x2h" path="res://enemy/spawner.tscn" id="3_spawner"]
+
+[node name="TestRealHero" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Arena" parent="." instance=ExtResource("2_map")]
+
+[node name="SpawnPoint1" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(-150, -150)
+
+[node name="SpawnPoint2" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(150, -150)
+
+[node name="SpawnPoint3" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(-150, 150)
+
+[node name="SpawnPoint4" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(150, 150)
+
+[node name="Spawner" parent="." instance=ExtResource("3_spawner")]
