@@ -30,6 +30,10 @@ const HAND_OFFSET := Vector2(64.0, -71.0)
 @export var melee_damage: int = 25
 ## How far the punch reaches in front of the player, in pixels.
 @export var melee_range: float = 100.0
+## How far the character lunges forward when swinging, in pixels.
+@export var melee_lunge_distance: float = 40.0
+## How long the lunge takes, in seconds.
+@export var melee_lunge_time: float = 0.15
 ## Health taken from each enemy the flash step passes through.
 @export var flash_damage: int = 15
 ## How close to the dash line an enemy must be to be hit, in pixels.
@@ -259,6 +263,12 @@ func _melee_attack() -> void:
 	if not sprite.sprite_frames.has_animation(anim):
 		anim = "attack_down"
 	sprite.play(anim)
+
+	# lunge a short step in the attack direction so the punch feels weighty
+	var lunge_target := global_position + _facing_vector() * melee_lunge_distance
+	var lunge := create_tween()
+	lunge.tween_property(self, "global_position", lunge_target, melee_lunge_time)
+	lunge.tween_callback(lunge.kill)
 
 	# the punch lands immediately: hurt anything in reach in front of us
 	_hit_enemies_in_front(melee_damage, melee_range)
