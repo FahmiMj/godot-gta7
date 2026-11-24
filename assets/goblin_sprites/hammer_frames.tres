@@ -1,0 +1,81 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/goblin_sprites/hammer_sheet.png" id="1_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle"]
+atlas = ExtResource("1_sheet")
+region = Rect2(0, 0, 178, 216)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_windup"]
+atlas = ExtResource("1_sheet")
+region = Rect2(178, 0, 178, 216)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jump"]
+atlas = ExtResource("1_sheet")
+region = Rect2(356, 0, 178, 216)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_slam"]
+atlas = ExtResource("1_sheet")
+region = Rect2(534, 0, 178, 216)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_recover"]
+atlas = ExtResource("1_sheet")
+region = Rect2(712, 0, 178, 216)
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idle")}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idle")}],
+"loop": true,
+"name": &"walk_side",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idle")}],
+"loop": true,
+"name": &"walk_up",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idle")}],
+"loop": true,
+"name": &"walk_down",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_windup")}],
+"loop": false,
+"name": &"windup",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_jump")}],
+"loop": false,
+"name": &"jump",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_slam")}],
+"loop": false,
+"name": &"slam",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_recover")}],
+"loop": false,
+"name": &"recover",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idle")}],
+"loop": false,
+"name": &"hurt",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_idle")}],
+"loop": false,
+"name": &"death",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_slam")}],
+"loop": false,
+"name": &"attack",
+"speed": 1.0
+}]

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwrwvaml0f0m"
-path="res://.godot/imported/heal_portion.webp-aea2179bef3bf6dbcc95a84da1558901.ctex"
+uid="uid://db7s11es33pc1"
+path="res://.godot/imported/mp_90.png-ef89ddf3cc6dd7ff34455a4885277aa6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/portions/heal_portion.webp"
-dest_files=["res://.godot/imported/heal_portion.webp-aea2179bef3bf6dbcc95a84da1558901.ctex"]
+source_file="res://assets/ui/mp/mp_90.png"
+dest_files=["res://.godot/imported/mp_90.png-ef89ddf3cc6dd7ff34455a4885277aa6.ctex"]
 
 [params]
 

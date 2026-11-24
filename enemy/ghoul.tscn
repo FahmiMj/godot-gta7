@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://c4ghlsc7n8v2e"]
+
+[ext_resource type="Script" path="res://enemy/ghoul.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://62whxcuw88x0" path="res://assets/ghoul_sprites/ghoul.webp" id="2_art"]
+[ext_resource type="Shader" uid="uid://cbb4gju61hd4h" path="res://enemy/ghoul.gdshader" id="3_shader"]
+[ext_resource type="AudioStream" uid="uid://dyky33gfrqqfj" path="res://assets/audio/ghoul_scream.wav" id="4_scream"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ghoul"]
+resource_local_to_scene = true
+shader = ExtResource("3_shader")
+shader_parameter/flash = 0.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ghoul"]
+radius = 34.0
+
+[node name="Ghoul" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 5
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Body" type="Node2D" parent="."]
+
+[node name="Sprite" type="Sprite2D" parent="Body"]
+texture_filter = 4
+material = SubResource("ShaderMaterial_ghoul")
+position = Vector2(0, -88)
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("2_art")
+
+[node name="Mouth" type="Marker2D" parent="Body"]
+position = Vector2(-10, -125)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ghoul")
+
+[node name="ScreamSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_scream")
+max_distance = 1800.0

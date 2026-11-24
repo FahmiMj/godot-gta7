@@ -5,6 +5,8 @@
 [ext_resource type="SpriteFrames" uid="uid://b3slshfx8q4wn" path="res://assets/goblin_sprites/goblin_slash_frames.tres" id="3_slash"]
 [ext_resource type="AudioStream" uid="uid://cqrc7dwlr45jt" path="res://assets/audio/goblin_swing.wav" id="4_swing"]
 
+[ext_resource type="SpriteFrames" path="res://assets/goblin_sprites/taunt_1_frames.tres" id="9_taunt"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_ofsxj"]
 radius = 26.0
 
@@ -13,6 +15,8 @@ collision_layer = 4
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_ofsxj")
+taunt_frames = ExtResource("9_taunt")
+taunt_position_y = -55.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=203520223]
 position = Vector2(0, -78)

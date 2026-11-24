@@ -2,37 +2,59 @@
 
 [ext_resource type="Script" uid="uid://djt3wq5y6kjpy" path="res://enemy/treasure_box.gd" id="1_box"]
 [ext_resource type="Texture2D" uid="uid://cnvqlaftwydyp" path="res://assets/TreasureChest.png" id="2_icon"]
-[ext_resource type="Texture2D" uid="uid://dwrwvaml0f0m" path="res://assets/portions/heal_portion.webp" id="3_potion"]
+[ext_resource type="Texture2D" path="res://assets/portions/wave_1.webp" id="3_potion"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_box"]
-radius = 16.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chest"]
+size = Vector2(128, 102)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_potion"]
+radius = 44.0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_potion"]
 blend_mode = 1
 
 [node name="TreasureBox" type="Area2D"]
-collision_layer = 16
-collision_mask = 3
+input_pickable = false
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
 script = ExtResource("1_box")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.055, 0.055)
+scale = Vector2(0.085, 0.085)
 texture = ExtResource("2_icon")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_box")
+[node name="ChestClick" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ChestClick"]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_chest")
+
+[node name="PotionClick" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PotionClick"]
+position = Vector2(0, -72)
+shape = SubResource("CircleShape2D_potion")
+disabled = true
 
 [node name="Potion" type="Sprite2D" parent="."]
 visible = false
 material = SubResource("CanvasItemMaterial_potion")
-position = Vector2(0, -44)
-scale = Vector2(0.061, 0.061)
+position = Vector2(0, -62)
+scale = Vector2(0.085, 0.085)
 texture = ExtResource("3_potion")
 
 [node name="Prompt" type="Label" parent="."]
-position = Vector2(-60, -118)
+position = Vector2(-60, -170)
 scale = Vector2(2, 2)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
-text = "[O] Open chest"
+text = "Double-click to open"
 horizontal_alignment = 1
