@@ -88,6 +88,8 @@ for _ in range(2):
 # --------------------------------------------------------------- glyphs
 glyph_layer = layer()
 gd = ImageDraw.Draw(glyph_layer)
+deco_layer = layer()
+dd = ImageDraw.Draw(deco_layer)
 OCHRE = (200, 152, 240, 238)
 TEAL = (140, 140, 235, 228)
 
@@ -156,13 +158,13 @@ while y <= H - INSET - 70:
     idx += 1
     y += STEP
 
-gd.rectangle([INSET, INSET, W - INSET, H - INSET], outline=(158, 130, 80, 95), width=4)
-gd.rectangle([INSET + BAND, INSET + BAND, W - INSET - BAND, H - INSET - BAND],
+dd.rectangle([INSET, INSET, W - INSET, H - INSET], outline=(158, 130, 80, 95), width=4)
+dd.rectangle([INSET + BAND, INSET + BAND, W - INSET - BAND, H - INSET - BAND],
              outline=(158, 130, 80, 75), width=3)
 
 # central emblem
-gd.ellipse([CENTER - 300, CENTER - 300, CENTER + 300, CENTER + 300], outline=(166, 138, 86, 140), width=6)
-gd.ellipse([CENTER - 278, CENTER - 278, CENTER + 278, CENTER + 278], outline=(166, 138, 86, 95), width=2)
+dd.ellipse([CENTER - 300, CENTER - 300, CENTER + 300, CENTER + 300], outline=(166, 138, 86, 140), width=6)
+dd.ellipse([CENTER - 278, CENTER - 278, CENTER + 278, CENTER + 278], outline=(166, 138, 86, 95), width=2)
 for k in range(4):
     a = math.pi / 2 * k + math.pi / 4
     glyph(gd, CENTER + math.cos(a) * 190, CENTER + math.sin(a) * 190, 64, (k * 3) % 10, OCHRE, 3)
@@ -195,7 +197,7 @@ for blur, strength in ((18, 0.48), (7, 0.38)):
     glyph_overlay.alpha_composite(purple_glow)
 
 glyph_overlay.alpha_composite(glyph_layer)
-img.alpha_composite(glyph_overlay)
+img.alpha_composite(deco_layer)
 
 # ------------------------------------------------------- cracks + scratches
 hi = layer()
@@ -809,19 +811,21 @@ dark = Image.new("RGBA", (W, H), (0, 0, 0, 80))
 dark.putalpha(ImageChops.subtract(Image.new("L", (W, H), 80), vig))
 img.alpha_composite(dark)
 
+# dim the glyph overlay toward the dark edges so it matches the baked vignette
+glyph_overlay.putalpha(ImageChops.multiply(
+    glyph_overlay.getchannel("A"), ImageChops.invert(dark.getchannel("A"))))
+
 # ------------------------------------------------------------- pixel-art pass
 PIXEL = 8
 small = img.convert("RGB").resize((W // PIXEL, H // PIXEL), Image.BOX)
 small = small.quantize(colors=32, method=Image.MEDIANCUT, dither=Image.NONE).convert("RGB")
 img = small.resize((W, H), Image.NEAREST).convert("RGBA")
 
-# re-apply the worn glyphs and their purple glow after quantization so they
-# keep their colour and stay crisp at the art's pixel resolution
+# keep the worn glyphs as their own pixel-art overlay so the game can pulse them
 glyph_px = glyph_overlay.resize((W // PIXEL, H // PIXEL), Image.BOX)
 glyph_px = glyph_px.resize((W, H), Image.NEAREST)
-img.alpha_composite(glyph_px)
 
-# --------------------------------------- vivid pixel flames (drawn after quantize)
+# ------------------------------- torch skull eyes (flames live in their own sheet)
 d = ImageDraw.Draw(img)
 
 
@@ -829,15 +833,32 @@ def px_snap(v):
     return int(round(v / PIXEL) * PIXEL)
 
 
-def px_block(x0, y0, x1, y1, col):
+def px_block(dr, x0, y0, x1, y1, col):
     x0 = px_snap(x0)
     x1 = max(x0 + PIXEL, px_snap(x1))
     y0 = px_snap(y0)
     y1 = max(y0 + PIXEL, px_snap(y1))
-    d.rectangle([x0, y0, x1 - 1, y1 - 1], fill=col)
+    dr.rectangle([x0, y0, x1 - 1, y1 - 1], fill=col)
 
 
-def pixel_tongue(cx, base_y, height, max_half, seed):
+TORCHES = [(-840, -840), (840, -840), (-840, 840), (840, 840)]
+
+for tx, ty in TORCHES:
+    cx = tx + CENTER
+    cy = ty + CENTER
+    for ex in (cx - 16, cx + 16):
+        px_block(d, ex - 10, cy - 16, ex + 10, cy + 4, (234, 104, 14, 255))
+        px_block(d, ex - 5, cy - 12, ex + 5, cy, (255, 214, 112, 255))
+        px_block(d, ex - 2, cy - 9, ex + 2, cy - 3, (255, 248, 206, 255))
+
+# ------------------------------------------- pixel flame spritesheet (animated)
+FLAME_W, FLAME_H = 128, 160
+FLAME_FRAMES = 6
+FLAME_BASE_Y = 152
+FLAME_MAIN_BASE_Y = 144
+
+
+def flame_tongue(dr, cx, base_y, height, max_half, seed):
     steps = max(3, int(height / PIXEL))
     for i in range(steps):
         u = i / (steps - 1)
@@ -845,39 +866,73 @@ def pixel_tongue(cx, base_y, height, max_half, seed):
         hw = max(PIXEL, px_snap(max_half * (1 - u) ** 0.6))
         wob = px_snap(math.sin(u * 5.2 + seed) * max_half * 0.35 * u)
         x = cx + wob
-        px_block(x - hw, y, x + hw, y + PIXEL, (196, 58, 6, 255))
+        px_block(dr, x - hw, y, x + hw, y + PIXEL, (196, 58, 6, 255))
         if hw >= PIXEL * 2:
-            px_block(x - hw * 0.70, y, x + hw * 0.70, y + PIXEL, (242, 112, 14, 255))
+            px_block(dr, x - hw * 0.70, y, x + hw * 0.70, y + PIXEL, (242, 112, 14, 255))
         if hw >= PIXEL * 3 and u < 0.82:
-            px_block(x - hw * 0.40, y, x + hw * 0.40, y + PIXEL, (255, 188, 58, 255))
+            px_block(dr, x - hw * 0.40, y, x + hw * 0.40, y + PIXEL, (255, 188, 58, 255))
         if hw >= PIXEL * 3 and u < 0.55:
-            px_block(x - hw * 0.18, y, x + hw * 0.18, y + PIXEL, (255, 240, 190, 255))
+            px_block(dr, x - hw * 0.18, y, x + hw * 0.18, y + PIXEL, (255, 240, 190, 255))
 
 
-def pixel_torch(cx, cy):
+def flame_frame(index):
+    t = Image.new("RGBA", (FLAME_W, FLAME_H), (0, 0, 0, 0))
+    dr = ImageDraw.Draw(t)
+    phase = index / FLAME_FRAMES * math.tau
+    rng = random.Random(9100 + index)
+
     # side tongues first, main tongue in front
-    pixel_tongue(cx - 23, cy - 34, 66, 18, 1.7)
-    pixel_tongue(cx + 21, cy - 32, 74, 18, 3.1)
-    pixel_tongue(cx, cy - 42, 94, 28, 0.4)
+    flame_tongue(dr, 41, FLAME_BASE_Y, 68 + math.sin(phase + 1.7) * 7, 17, 1.7 + phase * 0.55)
+    flame_tongue(dr, 87, FLAME_BASE_Y, 76 + math.sin(phase + 3.4) * 7, 17, 3.1 + phase * 0.55)
+    flame_tongue(dr, 64, FLAME_MAIN_BASE_Y, 96 + math.sin(phase) * 9, 27, 0.4 + phase * 0.55)
 
-    # glowing eye sockets
-    for ex in (cx - 16, cx + 16):
-        px_block(ex - 10, cy - 16, ex + 10, cy + 4, (234, 104, 14, 255))
-        px_block(ex - 5, cy - 12, ex + 5, cy, (255, 214, 112, 255))
-        px_block(ex - 2, cy - 9, ex + 2, cy - 3, (255, 248, 206, 255))
-
-    # embers drifting up
-    for _ in range(4):
-        ex = px_snap(cx + random.uniform(-40, 40))
-        ey = px_snap(cy - random.uniform(84, 124))
-        d.rectangle([ex, ey, ex + PIXEL - 1, ey + PIXEL - 1], fill=(255, 168, 52, 255))
+    # sparks that twinkle between frames
+    for _ in range(3):
+        ex = px_snap(64 + rng.uniform(-52, 52))
+        ey = px_snap(rng.uniform(16, 72))
+        px_block(dr, ex, ey, ex + PIXEL, ey + PIXEL, (255, 168, 52, 255))
+    return t
 
 
-for tx, ty in [(160, 160), (1840, 160), (160, 1840), (1840, 1840)]:
-    pixel_torch(tx, ty)
+sheet = Image.new("RGBA", (FLAME_W * FLAME_FRAMES, FLAME_H), (0, 0, 0, 0))
+for i in range(FLAME_FRAMES):
+    sheet.alpha_composite(flame_frame(i), (i * FLAME_W, 0))
+
+# -------------------------------------- outer dungeon floor behind the arena
+# The camera keeps the player centred, so the border walls can leave the map
+# edge on screen. This very dark stone surround fills that space.
+OUT_W, OUT_H = 4000, 3200
+outer = Image.new("RGB", (OUT_W, OUT_H), (12, 11, 11))
+od = ImageDraw.Draw(outer)
+OUT_TILE = 154
+out_row = 0
+for oy in range(0, OUT_H, OUT_TILE):
+    out_off = 0 if out_row % 2 == 0 else OUT_TILE // 2
+    for ox in range(-OUT_TILE + out_off, OUT_W, OUT_TILE):
+        base = (26, 24, 23) if (out_row + ox // OUT_TILE) % 2 == 0 else (22, 21, 20)
+        od.rectangle([ox + 3, oy + 3, min(ox + OUT_TILE - 4, OUT_W - 1),
+                      min(oy + OUT_TILE - 4, OUT_H - 1)], fill=base)
+    out_row += 1
+for _ in range(1600):
+    ox = random.uniform(0, OUT_W)
+    oy = random.uniform(0, OUT_H)
+    rr = random.uniform(1, 3)
+    od.ellipse([ox - rr, oy - rr, ox + rr, oy + rr], fill=(11, 10, 10))
+outer_small = outer.resize((OUT_W // PIXEL, OUT_H // PIXEL), Image.BOX)
+outer_small = outer_small.quantize(colors=10, method=Image.MEDIANCUT, dither=Image.NONE).convert("RGB")
+outer = outer_small.resize((OUT_W, OUT_H), Image.NEAREST)
 
 out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets")
 os.makedirs(out_dir, exist_ok=True)
 out_path = os.path.join(out_dir, "arena_map.png")
 img.convert("RGB").save(out_path)
+glyph_path = os.path.join(out_dir, "glyph_glow.png")
+glyph_px.save(glyph_path)
+flame_path = os.path.join(out_dir, "torch_flame.png")
+sheet.save(flame_path)
+outer_path = os.path.join(out_dir, "void_floor.png")
+outer.save(outer_path)
 print("saved", out_path, img.size)
+print("saved", glyph_path, glyph_px.size)
+print("saved", flame_path, sheet.size)
+print("saved", outer_path, outer.size)

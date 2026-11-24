@@ -1,11 +1,24 @@
 
-[gd_scene load_steps=8 format=3 uid="uid://b62pkp2gxhpxh"]
+[gd_scene load_steps=18 format=3 uid="uid://b62pkp2gxhpxh"]
 
 [ext_resource type="Texture2D" uid="uid://dkh170sren6tb" path="res://assets/arena_map.png" id="1_map"]
 [ext_resource type="Script" uid="uid://dwwbgmf2yjxmo" path="res://scripts/torch_flicker.gd" id="2_flicker"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
 [ext_resource type="PackedScene" path="res://enemy/goblin_wave.tscn" id="4_wave"]
 [ext_resource type="Script" path="res://scripts/debug_ui.gd" id="5_debug"]
+[ext_resource type="Texture2D" path="res://assets/ui/hp/hp_100.png" id="11_hp"]
+[ext_resource type="Texture2D" path="res://assets/ui/mp/mp_100.png" id="13_mp"]
+[ext_resource type="Texture2D" path="res://assets/glyph_glow.png" id="7_glyph"]
+[ext_resource type="Shader" path="res://assets/shaders/glyph_pulse.gdshader" id="8_glyph_shader"]
+[ext_resource type="Texture2D" path="res://assets/torch_flame.png" id="9_flame"]
+[ext_resource type="Script" path="res://scripts/torch_flame.gd" id="10_flame"]
+[ext_resource type="Texture2D" path="res://assets/void_floor.png" id="12_void"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
+size = Vector2(2000, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
+size = Vector2(100, 2000)
 
 [sub_resource type="Gradient" id="Gradient_light"]
 offsets = PackedFloat32Array(0, 0.42, 0.78, 1)
@@ -19,14 +32,78 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.5, 0)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_glyph"]
+shader = ExtResource("8_glyph_shader")
+
 [node name="Arena" type="Node2D" unique_id=414365090]
+
+[node name="VoidFloor" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("12_void")
 
 [node name="Ground" type="Sprite2D" parent="." unique_id=1835009838]
 texture_filter = 1
 texture = ExtResource("1_map")
 
+[node name="GlyphGlow" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_glyph")
+texture_filter = 1
+texture = ExtResource("7_glyph")
+
+[node name="TorchFlames" type="Node2D" parent="."]
+
+[node name="FlameNW" type="Sprite2D" parent="TorchFlames"]
+position = Vector2(-840, -864)
+texture_filter = 1
+texture = ExtResource("9_flame")
+hframes = 6
+offset = Vector2(0, -80)
+script = ExtResource("10_flame")
+
+[node name="FlameNE" type="Sprite2D" parent="TorchFlames"]
+position = Vector2(840, -864)
+texture_filter = 1
+texture = ExtResource("9_flame")
+hframes = 6
+offset = Vector2(0, -80)
+script = ExtResource("10_flame")
+
+[node name="FlameSW" type="Sprite2D" parent="TorchFlames"]
+position = Vector2(-840, 816)
+texture_filter = 1
+texture = ExtResource("9_flame")
+hframes = 6
+offset = Vector2(0, -80)
+script = ExtResource("10_flame")
+
+[node name="FlameSE" type="Sprite2D" parent="TorchFlames"]
+position = Vector2(840, 816)
+texture_filter = 1
+texture = ExtResource("9_flame")
+hframes = 6
+offset = Vector2(0, -80)
+script = ExtResource("10_flame")
+
 [node name="Player" parent="." unique_id=761353335 groups=["player"] instance=ExtResource("3_player")]
 speed = 400.0
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="Top" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0, -950)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="Bottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0, 950)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="Left" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-950, 0)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="Right" type="CollisionShape2D" parent="Walls"]
+position = Vector2(950, 0)
+shape = SubResource("RectangleShape2D_wall_v")
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=771481218]
 color = Color(0.5, 0.5, 0.57, 1)
@@ -68,19 +145,41 @@ script = ExtResource("2_flicker")
 [node name="DebugUI" type="CanvasLayer" parent="."]
 script = ExtResource("5_debug")
 
+[node name="HealthBar" type="TextureRect" parent="DebugUI"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 140.0
+offset_bottom = 44.0
+mouse_filter = 2
+texture = ExtResource("11_hp")
+texture_filter = 1
+
+[node name="ManaBar" type="TextureRect" parent="DebugUI"]
+offset_left = 12.0
+offset_top = 46.0
+offset_right = 140.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("13_mp")
+texture_filter = 1
+
 [node name="Panel" type="PanelContainer" parent="DebugUI"]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 220.0
-offset_bottom = 92.0
+offset_left = 12.0
+offset_top = 84.0
+offset_right = 140.0
+offset_bottom = 160.0
 
 [node name="VBox" type="VBoxContainer" parent="DebugUI/Panel"]
-
-[node name="HealthLabel" type="Label" parent="DebugUI/Panel/VBox"]
-text = "HP: 200 / 200"
+theme_override_constants/separation = 2
 
 [node name="DamageButton" type="Button" parent="DebugUI/Panel/VBox"]
-text = "Take 50 Damage"
+theme_override_font_sizes/font_size = 11
+text = "Take 10 Damage"
 
 [node name="ReviveButton" type="Button" parent="DebugUI/Panel/VBox"]
+theme_override_font_sizes/font_size = 11
 text = "Revive"
+
+[node name="ManaButton" type="Button" parent="DebugUI/Panel/VBox"]
+theme_override_font_sizes/font_size = 11
+text = "Add 10 Mana"
