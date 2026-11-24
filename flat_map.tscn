@@ -18,6 +18,7 @@
 [ext_resource type="Shader" path="res://assets/shaders/summon_ring.gdshader" id="17_ring_shader"]
 [ext_resource type="Texture2D" path="res://assets/torch_flame_blue.png" id="18_blue_flame"]
 [ext_resource type="Script" path="res://scripts/water_ripple.gd" id="19_ripple"]
+[ext_resource type="Script" path="res://scripts/grate_eyes.gd" id="20_grate_eyes"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_corridor_glyph"]
 shader = ExtResource("8_glyph_shader")
@@ -40,7 +41,7 @@ size = Vector2(100, 2000)
 size = Vector2(100, 850)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_corridor_wall"]
-size = Vector2(750, 100)
+size = Vector2(1500, 100)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_room2_h"]
 size = Vector2(2300, 100)
@@ -50,6 +51,12 @@ size = Vector2(100, 2100)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_room2_east"]
 size = Vector2(100, 900)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rack_wide"]
+size = Vector2(480, 214)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rack_narrow"]
+size = Vector2(360, 214)
 
 [sub_resource type="Gradient" id="Gradient_light"]
 offsets = PackedFloat32Array(0, 0.42, 0.78, 1)
@@ -95,18 +102,18 @@ texture_filter = 1
 texture = ExtResource("7_glyph")
 
 [node name="Corridor" type="Sprite2D" parent="."]
-position = Vector2(-1275, 0)
+position = Vector2(-1650, 0)
 texture_filter = 1
 texture = ExtResource("14_corridor")
 
 [node name="CorridorGlyphs" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_corridor_glyph")
-position = Vector2(-1275, 0)
+position = Vector2(-1650, 0)
 texture_filter = 1
 texture = ExtResource("15_corridor_glyph")
 
 [node name="Room2" type="Sprite2D" parent="."]
-position = Vector2(-2700, 0)
+position = Vector2(-3450, 0)
 texture_filter = 1
 texture = ExtResource("13_room2")
 
@@ -114,31 +121,35 @@ texture = ExtResource("13_room2")
 
 [node name="RingNW" type="Sprite2D" parent="SummonRings"]
 material = SubResource("ShaderMaterial_ring")
-position = Vector2(-3490, -690)
+position = Vector2(-4240, -690)
 texture_filter = 1
 texture = ExtResource("16_ring")
 
 [node name="RingNE" type="Sprite2D" parent="SummonRings"]
 material = SubResource("ShaderMaterial_ring")
-position = Vector2(-1910, -690)
+position = Vector2(-2660, -690)
 texture_filter = 1
 texture = ExtResource("16_ring")
 
 [node name="RingSW" type="Sprite2D" parent="SummonRings"]
 material = SubResource("ShaderMaterial_ring")
-position = Vector2(-3490, 690)
+position = Vector2(-4240, 690)
 texture_filter = 1
 texture = ExtResource("16_ring")
 
 [node name="RingSE" type="Sprite2D" parent="SummonRings"]
 material = SubResource("ShaderMaterial_ring")
-position = Vector2(-1910, 690)
+position = Vector2(-2660, 690)
 texture_filter = 1
 texture = ExtResource("16_ring")
 
 [node name="PuddleRipples" type="Node2D" parent="."]
 script = ExtResource("19_ripple")
-positions = PackedVector2Array(-3090, -290, -2440, -430, -2170, -230, -2840, 340, -2380, 530, -3200, 590, -2730, -70, -1350, -10, -1090, 70)
+positions = PackedVector2Array(-3840, -290, -3190, -430, -2920, -230, -3590, 340, -3130, 530, -3950, 590, -3480, -70, -2040, -10, -1640, 70, -1260, -20)
+
+[node name="GrateEyes" type="Node2D" parent="."]
+script = ExtResource("20_grate_eyes")
+positions = PackedVector2Array(-3550, 670, -3070, -665, -3930, -390, -2920, 215)
 
 [node name="TorchFlames" type="Node2D" parent="."]
 
@@ -177,7 +188,7 @@ script = ExtResource("10_flame")
 [node name="Room2Flames" type="Node2D" parent="."]
 
 [node name="FlameNW" type="Sprite2D" parent="Room2Flames"]
-position = Vector2(-3250, -1010)
+position = Vector2(-4000, -1010)
 texture_filter = 1
 texture = ExtResource("18_blue_flame")
 hframes = 6
@@ -186,7 +197,7 @@ script = ExtResource("10_flame")
 ember_color = Color(0.52, 0.78, 1, 0.9)
 
 [node name="FlameNE" type="Sprite2D" parent="Room2Flames"]
-position = Vector2(-2150, -1010)
+position = Vector2(-2900, -1010)
 texture_filter = 1
 texture = ExtResource("18_blue_flame")
 hframes = 6
@@ -195,7 +206,7 @@ script = ExtResource("10_flame")
 ember_color = Color(0.52, 0.78, 1, 0.9)
 
 [node name="FlameSW" type="Sprite2D" parent="Room2Flames"]
-position = Vector2(-3250, 950)
+position = Vector2(-4000, 950)
 texture_filter = 1
 texture = ExtResource("18_blue_flame")
 hframes = 6
@@ -204,7 +215,7 @@ script = ExtResource("10_flame")
 ember_color = Color(0.52, 0.78, 1, 0.9)
 
 [node name="FlameSE" type="Sprite2D" parent="Room2Flames"]
-position = Vector2(-2150, 950)
+position = Vector2(-2900, 950)
 texture_filter = 1
 texture = ExtResource("18_blue_flame")
 hframes = 6
@@ -215,7 +226,7 @@ ember_color = Color(0.52, 0.78, 1, 0.9)
 [node name="CorridorFlames" type="Node2D" parent="."]
 
 [node name="FlameW" type="Sprite2D" parent="CorridorFlames"]
-position = Vector2(-1410, -150)
+position = Vector2(-1950, -150)
 scale = Vector2(0.7, 0.7)
 texture_filter = 1
 texture = ExtResource("18_blue_flame")
@@ -227,7 +238,7 @@ ember_count = 6
 ember_color = Color(0.52, 0.78, 1, 0.9)
 
 [node name="FlameE" type="Sprite2D" parent="CorridorFlames"]
-position = Vector2(-1140, 150)
+position = Vector2(-1350, 150)
 scale = Vector2(0.7, 0.7)
 texture_filter = 1
 texture = ExtResource("18_blue_flame")
@@ -264,32 +275,50 @@ position = Vector2(950, 0)
 shape = SubResource("RectangleShape2D_wall_v")
 
 [node name="CorridorTop" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-1275, -200)
+position = Vector2(-1650, -200)
 shape = SubResource("RectangleShape2D_corridor_wall")
 
 [node name="CorridorBottom" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-1275, 200)
+position = Vector2(-1650, 200)
 shape = SubResource("RectangleShape2D_corridor_wall")
 
 [node name="Room2North" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-2700, -1000)
+position = Vector2(-3450, -1000)
 shape = SubResource("RectangleShape2D_room2_h")
 
 [node name="Room2South" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-2700, 1000)
+position = Vector2(-3450, 1000)
 shape = SubResource("RectangleShape2D_room2_h")
 
 [node name="Room2West" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-3800, 0)
+position = Vector2(-4550, 0)
 shape = SubResource("RectangleShape2D_room2_v")
 
 [node name="Room2EastNorth" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-1600, -600)
+position = Vector2(-2350, -600)
 shape = SubResource("RectangleShape2D_room2_east")
 
 [node name="Room2EastSouth" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-1600, 600)
+position = Vector2(-2350, 600)
 shape = SubResource("RectangleShape2D_room2_east")
+
+[node name="StorageProps" type="StaticBody2D" parent="."]
+
+[node name="RackNW" type="CollisionShape2D" parent="StorageProps"]
+position = Vector2(-3720, -831)
+shape = SubResource("RectangleShape2D_rack_wide")
+
+[node name="RackNE" type="CollisionShape2D" parent="StorageProps"]
+position = Vector2(-3060, -831)
+shape = SubResource("RectangleShape2D_rack_narrow")
+
+[node name="RackSW" type="CollisionShape2D" parent="StorageProps"]
+position = Vector2(-3720, 831)
+shape = SubResource("RectangleShape2D_rack_wide")
+
+[node name="RackSE" type="CollisionShape2D" parent="StorageProps"]
+position = Vector2(-3060, 831)
+shape = SubResource("RectangleShape2D_rack_narrow")
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=771481218]
 color = Color(0.5, 0.5, 0.57, 1)
@@ -327,7 +356,7 @@ texture_scale = 3.0
 script = ExtResource("2_flicker")
 
 [node name="Room2TorchNW" type="PointLight2D" parent="."]
-position = Vector2(-3250, -986)
+position = Vector2(-4000, -986)
 color = Color(0.44, 0.68, 1, 1)
 energy = 1.05
 texture = SubResource("GradientTexture2D_light_blue")
@@ -335,7 +364,7 @@ texture_scale = 3.0
 script = ExtResource("2_flicker")
 
 [node name="Room2TorchNE" type="PointLight2D" parent="."]
-position = Vector2(-2150, -986)
+position = Vector2(-2900, -986)
 color = Color(0.44, 0.68, 1, 1)
 energy = 1.05
 texture = SubResource("GradientTexture2D_light_blue")
@@ -343,7 +372,7 @@ texture_scale = 3.0
 script = ExtResource("2_flicker")
 
 [node name="Room2TorchSW" type="PointLight2D" parent="."]
-position = Vector2(-3250, 986)
+position = Vector2(-4000, 986)
 color = Color(0.44, 0.68, 1, 1)
 energy = 1.05
 texture = SubResource("GradientTexture2D_light_blue")
@@ -351,7 +380,7 @@ texture_scale = 3.0
 script = ExtResource("2_flicker")
 
 [node name="Room2TorchSE" type="PointLight2D" parent="."]
-position = Vector2(-2150, 986)
+position = Vector2(-2900, 986)
 color = Color(0.44, 0.68, 1, 1)
 energy = 1.05
 texture = SubResource("GradientTexture2D_light_blue")
@@ -359,7 +388,7 @@ texture_scale = 3.0
 script = ExtResource("2_flicker")
 
 [node name="CorridorTorchW" type="PointLight2D" parent="."]
-position = Vector2(-1410, -120)
+position = Vector2(-1950, -120)
 color = Color(0.42, 0.66, 1, 1)
 energy = 0.55
 texture = SubResource("GradientTexture2D_light_blue")
@@ -367,7 +396,7 @@ texture_scale = 2.2
 script = ExtResource("2_flicker")
 
 [node name="CorridorTorchE" type="PointLight2D" parent="."]
-position = Vector2(-1140, 120)
+position = Vector2(-1350, 120)
 color = Color(0.42, 0.66, 1, 1)
 energy = 0.55
 texture = SubResource("GradientTexture2D_light_blue")
@@ -383,35 +412,35 @@ texture_scale = 1.6
 script = ExtResource("2_flicker")
 
 [node name="RingLightNW" type="PointLight2D" parent="."]
-position = Vector2(-3490, -690)
+position = Vector2(-4240, -690)
 color = Color(0.5, 0.66, 1, 1)
 energy = 0.55
 texture = SubResource("GradientTexture2D_light_blue")
 texture_scale = 1.6
 
 [node name="RingLightNE" type="PointLight2D" parent="."]
-position = Vector2(-1910, -690)
+position = Vector2(-2660, -690)
 color = Color(0.5, 0.66, 1, 1)
 energy = 0.55
 texture = SubResource("GradientTexture2D_light_blue")
 texture_scale = 1.6
 
 [node name="RingLightSW" type="PointLight2D" parent="."]
-position = Vector2(-3490, 690)
+position = Vector2(-4240, 690)
 color = Color(0.5, 0.66, 1, 1)
 energy = 0.55
 texture = SubResource("GradientTexture2D_light_blue")
 texture_scale = 1.6
 
 [node name="RingLightSE" type="PointLight2D" parent="."]
-position = Vector2(-1910, 690)
+position = Vector2(-2660, 690)
 color = Color(0.5, 0.66, 1, 1)
 energy = 0.55
 texture = SubResource("GradientTexture2D_light_blue")
 texture_scale = 1.6
 
 [node name="Room2CenterLight" type="PointLight2D" parent="."]
-position = Vector2(-2700, 0)
+position = Vector2(-3450, 0)
 color = Color(0.42, 0.58, 0.92, 1)
 energy = 0.72
 texture = SubResource("GradientTexture2D_light_blue")

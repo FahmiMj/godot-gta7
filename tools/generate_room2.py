@@ -3,11 +3,12 @@ to the main arena, and the animated props those rooms need.
 
 Assets written next to arena_map.png:
   room2_map.png         2300x2100 floor plan (1800x1800-style stone, but colder)
-  corridor_map.png       750x500  connecting passage
-  corridor_glyphs.png    750x500  pulsing inscription overlay for the corridor
+  corridor_map.png      1500x500  connecting passage
+  corridor_glyphs.png   1500x500  pulsing inscription overlay for the corridor
   summon_ring.png        400x400  corner ritual ring
   torch_flame_blue.png   768x160  6-frame blue flame sheet
   water_ripple.png        96x96   expanding ring used by puddle_ripples.gd
+  grate_eyes.png         120x48   monster eyes seen between grate bars
 """
 
 from PIL import Image, ImageDraw, ImageFilter, ImageChops
@@ -22,13 +23,13 @@ ROOM_W, ROOM_H = 2300, 2100
 WALL = 100
 ROOM_CX, ROOM_CY = ROOM_W // 2, ROOM_H // 2
 
-COR_W, COR_H = 750, 500
+COR_W, COR_H = 1500, 500
 COR_CX, COR_CY = COR_W // 2, COR_H // 2
 
 # texture pixel -> world position helpers are only shown in comments; the room
-# sprite is placed at (-2700, 0) and the corridor sprite at (-1275, 0).
-# room2:  world_x = local_x - 3850, world_y = local_y - 1050
-# corridor: world_x = local_x - 1650, world_y = local_y - 250
+# sprite is placed at (-3450, 0) and the corridor sprite at (-1650, 0).
+# room2:  world_x = local_x - 4600, world_y = local_y - 1050
+# corridor: world_x = local_x - 2400, world_y = local_y - 250
 
 FLOOR_BASE = (79, 79, 79)
 WALL_BASE = (47, 47, 49)
@@ -483,6 +484,21 @@ def paste_prop(tile, cx, cy, angle=0.0, shadow_rx=None, shadow_ry=None):
     img.alpha_composite(t, (int(cx - t.width / 2), int(cy - t.height / 2)))
 
 
+def paste_rack_prop(tile, cx, cy, angle=0.0, shadow_rx=None, shadow_ry=None):
+    """Like paste_prop, but casts its shadow onto the rack instead of the floor."""
+    if shadow_rx is None:
+        shadow_rx = tile.width * 0.44
+    if shadow_ry is None:
+        shadow_ry = tile.height * 0.34
+    sh = layer()
+    shd = ImageDraw.Draw(sh)
+    shd.ellipse([cx - shadow_rx + 3, cy - shadow_ry + 5, cx + shadow_rx + 3, cy + shadow_ry + 5],
+                fill=(0, 0, 0, 115))
+    img.alpha_composite(sh.filter(ImageFilter.GaussianBlur(4)))
+    t = tile.rotate(angle, resample=Image.BICUBIC, expand=True)
+    img.alpha_composite(t, (int(cx - t.width / 2), int(cy - t.height / 2)))
+
+
 for cx, cy, sz, ang in [
     (260, 880, 84, -8), (430, 1030, 72, 11), (250, 1200, 80, 5), (420, 1360, 66, -14),
     (940, 280, 88, 7), (1130, 400, 72, -10), (1770, 1240, 82, 12), (1620, 1420, 70, -6),
@@ -493,6 +509,58 @@ for cx, cy, rr in [
     (366, 1082, 42), (526, 882, 38), (1024, 432, 40), (1810, 1182, 44), (1734, 1452, 36),
 ]:
     paste_prop(barrel_tile(rr), cx, cy, 0.0, rr * 1.05, rr * 0.9)
+
+# ------------------------------------------------------------ storage racks
+def rack_base(x0, y0, x1, y1):
+    """Low timber shelf with iron rails, drawn on the floor before its cargo."""
+    sh = layer()
+    sd = ImageDraw.Draw(sh)
+    sd.rectangle([x0 + 6, y0 + 8, x1 + 6, y1 + 8], fill=(0, 0, 0, 125))
+    img.alpha_composite(sh.filter(ImageFilter.GaussianBlur(8)))
+
+    d.rectangle([x0, y0, x1, y1], fill=(70, 49, 29, 255), outline=(34, 23, 12, 255), width=6)
+    planks = 7
+    for i in range(planks):
+        px0 = x0 + (x1 - x0) * i / planks
+        px1 = x0 + (x1 - x0) * (i + 1) / planks
+        d.rectangle([px0 + 3, y0 + 5, px1 - 3, y1 - 5], fill=shade((128, 90, 52), 9) + (255,))
+        d.line([px0 + 5, y0 + 8, px0 + 5, y1 - 8], fill=(176, 132, 78, 150), width=2)
+
+    # iron rails along the long edges
+    for ry in (y0 + 7, y1 - 7):
+        d.line([x0 + 10, ry, x1 - 10, ry], fill=(74, 76, 82, 255), width=4)
+        d.line([x0 + 10, ry - 2, x1 - 10, ry - 2], fill=(138, 142, 148, 255), width=1)
+    for bx in (x0 + 10, x1 - 10):
+        for by in (y0 + 10, y1 - 10):
+            d.ellipse([bx - 5, by - 5, bx + 5, by + 5], fill=(104, 106, 112, 255))
+            d.ellipse([bx - 2, by - 2, bx + 2, by + 2], fill=(184, 186, 190, 255))
+
+
+def barrel_rack(x0, y0, x1, y1, radius=40):
+    rack_base(x0, y0, x1, y1)
+    cols, rows = 4, 2
+    for r in range(rows):
+        for c in range(cols):
+            cx = x0 + (x1 - x0) * (c + 0.5) / cols
+            cy = y0 + (y1 - y0) * (r + 0.5) / rows
+            paste_rack_prop(barrel_tile(radius), cx, cy, 0.0, radius, radius * 0.86)
+
+
+def crate_rack(x0, y0, x1, y1, size=76):
+    rack_base(x0, y0, x1, y1)
+    cols, rows = 4, 2
+    for r in range(rows):
+        for c in range(cols):
+            cx = x0 + (x1 - x0) * (c + 0.5) / cols
+            cy = y0 + (y1 - y0) * (r + 0.5) / rows
+            paste_rack_prop(crate_tile(size), cx, cy, random.uniform(-5.0, 5.0))
+
+
+# barrels top-left / bottom-right, crates top-right / bottom-left
+barrel_rack(640, 112, 1120, 326)
+crate_rack(1360, 112, 1720, 326)
+crate_rack(640, 1774, 1120, 1988)
+barrel_rack(1360, 1774, 1720, 1988, 36)
 
 img.alpha_composite(prop_shadow.filter(ImageFilter.GaussianBlur(6)))
 
@@ -720,8 +788,9 @@ def draw_corridor_puddle(cx, cy, rx, ry):
     cd.line([cx - rx * 0.4, cy - ry * 0.1, cx + rx * 0.2, cy + ry * 0.1], fill=(92, 132, 158, 120), width=3)
 
 
-draw_corridor_puddle(300, 240, 58, 32)
-draw_corridor_puddle(560, 320, 70, 36)
+draw_corridor_puddle(360, 240, 58, 32)
+draw_corridor_puddle(760, 320, 70, 36)
+draw_corridor_puddle(1140, 230, 62, 34)
 
 # inscriptions on both walls
 cdd.rectangle([0, 12, COR_W - 1, 13], fill=(112, 140, 170, 70))
@@ -797,8 +866,8 @@ def corridor_sconce(cx, side):
     add_glow(cimg, cx, open_y, 74, 48, (44, 116, 216, 72), 18)
 
 
-corridor_sconce(240, "top")
-corridor_sconce(510, "bottom")
+corridor_sconce(450, "top")
+corridor_sconce(1050, "bottom")
 
 # vignette
 cvig = Image.new("L", (COR_W, COR_H), 0)
@@ -933,9 +1002,43 @@ ripple = ripple_small.resize((RIP, RIP), Image.NEAREST)
 ripple_path = os.path.join(OUT_DIR, "water_ripple.png")
 ripple.save(ripple_path)
 
+# ============================================================= GRATE EYES
+random.seed(76)
+EYE_W, EYE_H = 120, 48
+eyes = Image.new("RGBA", (EYE_W, EYE_H), (0, 0, 0, 0))
+ed = ImageDraw.Draw(eyes)
+
+# a barely-there head behind the bars
+presence = Image.new("RGBA", (EYE_W, EYE_H), (0, 0, 0, 0))
+pd2 = ImageDraw.Draw(presence)
+pd2.ellipse([26, 1, 94, 44], fill=(6, 3, 2, 130))
+eyes.alpha_composite(presence.filter(ImageFilter.GaussianBlur(6)))
+
+for ex in (44, 76):
+    glow = Image.new("RGBA", (EYE_W, EYE_H), (0, 0, 0, 0))
+    gd3 = ImageDraw.Draw(glow)
+    gd3.ellipse([ex - 15, 2, ex + 15, 20], fill=(255, 118, 36, 115))
+    eyes.alpha_composite(glow.filter(ImageFilter.GaussianBlur(5)))
+    ed.ellipse([ex - 10, 6, ex + 10, 18], fill=(18, 7, 3, 235))
+    ed.ellipse([ex - 8, 7, ex + 8, 17], fill=(255, 148, 46, 235))
+    ed.ellipse([ex - 2, 7, ex + 2, 17], fill=(26, 10, 4, 255))
+    ed.ellipse([ex - 6, 8, ex - 3, 11], fill=(255, 236, 180, 240))
+
+# hide anything that would overlap the grate's vertical bars and crossbar
+eye_mask = Image.new("L", (EYE_W, EYE_H), 255)
+emd = ImageDraw.Draw(eye_mask)
+for bx in (-3, 27, 57, 87, 117):
+    emd.rectangle([bx, 0, bx + 5, EYE_H], fill=0)
+emd.rectangle([0, 20, EYE_W, 27], fill=0)
+eyes.putalpha(ImageChops.multiply(eyes.getchannel("A"), eye_mask))
+
+eye_path = os.path.join(OUT_DIR, "grate_eyes.png")
+eyes.save(eye_path)
+
 print("saved", room_path, img.size)
 print("saved", cor_path, cimg.size)
 print("saved", cor_glyph_path, c_glyph_px.size)
 print("saved", ring_path, ring.size)
 print("saved", blue_path, blue_sheet.size)
 print("saved", ripple_path, ripple.size)
+print("saved", eye_path, eyes.size)
