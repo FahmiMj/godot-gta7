@@ -152,8 +152,10 @@ while x <= W - INSET - 70:
 
 y = INSET + 70
 while y <= H - INSET - 70:
-    glyph(gd, MID, y, 58, idx % 10, TEAL if idx % 7 == 3 else OCHRE, 3)
-    idx += 1
+    # keep the west gate (y 850..1150) clear of carvings so the passage reads as open
+    if not (790 <= y <= 1210):
+        glyph(gd, MID, y, 58, idx % 10, TEAL if idx % 7 == 3 else OCHRE, 3)
+        idx += 1
     glyph(gd, W - MID, y, 58, idx % 10, TEAL if idx % 7 == 3 else OCHRE, 3)
     idx += 1
     y += STEP
@@ -456,6 +458,31 @@ gs = layer()
 gsh = ImageDraw.Draw(gs)
 gsh.rectangle([GATE_X0, WALL, GATE_X1, WALL + 30], fill=(0, 0, 0, 115))
 img.alpha_composite(gs.filter(ImageFilter.GaussianBlur(11)))
+
+# ------------------------------------- west gate (passage to the ritual room)
+WG_Y0, WG_Y1 = 850, 1150
+# carve the passage through the wall thickness
+d.rectangle([0, WG_Y0, WALL - 1, WG_Y1 - 1], fill=(31, 32, 35, 255))
+for gy in range(WG_Y0, WG_Y1, 72):
+    d.line([2, gy, WALL - 2, gy], fill=(22, 23, 26, 255), width=2)
+d.line([WALL // 2, WG_Y0, WALL // 2, WG_Y1], fill=(22, 23, 26, 255), width=2)
+# stone jambs frame the opening
+d.rectangle([0, WG_Y0 - 48, WALL - 1, WG_Y0 - 1], fill=(94, 88, 81, 255))
+d.rectangle([0, WG_Y1, WALL - 1, WG_Y1 + 47], fill=(94, 88, 81, 255))
+d.rectangle([0, WG_Y0 - 48, WALL - 1, WG_Y0 - 1], outline=(40, 36, 32, 255), width=2)
+d.rectangle([0, WG_Y1, WALL - 1, WG_Y1 + 47], outline=(40, 36, 32, 255), width=2)
+# worn threshold at the arena-side mouth
+d.rectangle([WALL - 10, WG_Y0 - 4, WALL + 10, WG_Y1 + 3], fill=(70, 65, 59, 255))
+d.line([WALL - 10, WG_Y0, WALL - 10, WG_Y1 - 1], fill=(118, 112, 102, 255), width=2)
+# shadow in the mouth, then cold light spilling out of the corridor
+wgs = layer()
+wgsd = ImageDraw.Draw(wgs)
+wgsd.rectangle([WALL, WG_Y0, WALL + 26, WG_Y1], fill=(0, 0, 0, 105))
+img.alpha_composite(wgs.filter(ImageFilter.GaussianBlur(10)))
+wg = layer()
+wgd = ImageDraw.Draw(wg)
+wgd.ellipse([WALL - 20, WG_Y0 + 30, WALL + 250, WG_Y1 - 30], fill=(46, 102, 176, 66))
+img.alpha_composite(wg.filter(ImageFilter.GaussianBlur(40)))
 
 # ---------------------------------------------------------------- pillars
 PILLARS = [(-500, -840), (500, -840), (-500, 840), (500, 840),
@@ -901,7 +928,7 @@ for i in range(FLAME_FRAMES):
 # -------------------------------------- outer dungeon floor behind the arena
 # The camera keeps the player centred, so the border walls can leave the map
 # edge on screen. This very dark stone surround fills that space.
-OUT_W, OUT_H = 4000, 3200
+OUT_W, OUT_H = 7000, 3200
 outer = Image.new("RGB", (OUT_W, OUT_H), (12, 11, 11))
 od = ImageDraw.Draw(outer)
 OUT_TILE = 154
