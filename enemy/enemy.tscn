@@ -5,6 +5,7 @@
 [ext_resource type="SpriteFrames" uid="uid://b3slshfx8q4wn" path="res://assets/goblin_sprites/goblin_slash_frames.tres" id="3_slash"]
 [ext_resource type="AudioStream" uid="uid://cqrc7dwlr45jt" path="res://assets/audio/goblin_swing.wav" id="4_swing"]
 [ext_resource type="Script" path="res://enemy/health_bar.gd" id="5_healthbar"]
+[ext_resource type="AudioStream" path="res://assets/audio/oof.wav" id="6_hurt"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ofsxj"]
 radius = 26.0
@@ -41,3 +42,7 @@ animation = &"slash"
 [node name="SwingSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("4_swing")
 volume_db = -4.0
+
+[node name="HurtSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_hurt")
+volume_db = -9.0

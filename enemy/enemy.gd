@@ -8,6 +8,8 @@ signal died(points: int)
 const HIT_FRAME: int = 2
 ## Swing frame where the sword starts moving fast: the whoosh starts here.
 const SOUND_FRAME: int = 1
+## Tint used for the brief red flash when the enemy is hit.
+const HIT_FLASH := Color(1.8, 0.3, 0.3)
 ## Standing spots around the player, as angles in degrees (0 = right, 180 = left).
 ## The sides come first, so enemies fill left and right before the diagonals.
 const SLOT_ANGLES: Array[float] = [0.0, 180.0, -50.0, 230.0, 50.0, 130.0]
@@ -39,11 +41,13 @@ var _swing_sound_done: bool = false
 var _blocked_time: float = 0.0
 var _detour_time: float = 0.0
 var _detour: Vector2 = Vector2.ZERO
+var _hit_flash_tween: Tween
 
 @onready var _attack_timer: Timer = $AttackTimer
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var _slash: AnimatedSprite2D = $SlashEffect
 @onready var _swing_sound: AudioStreamPlayer2D = $SwingSound
+@onready var _hurt_sound: AudioStreamPlayer2D = $HurtSound
 @onready var _health_bar: EnemyHealthBar = $HealthBar
 
 
@@ -83,12 +87,24 @@ func take_damage(amount: int) -> void:
 		return
 	_health -= amount
 	_health_bar.set_health(_health, max_health)
+	_flash_hit()
+	_hurt_sound.play()
 	if _health <= 0:
 		_die()
 	else:
 		_swinging = false
 		_cancel_swing_effects()
 		_sprite.play("hurt")
+
+
+## Flashes the sprite red for a beat so a hit is readable at a glance.
+func _flash_hit() -> void:
+	if _hit_flash_tween and _hit_flash_tween.is_valid():
+		_hit_flash_tween.kill()
+	_sprite.modulate = HIT_FLASH
+	_hit_flash_tween = create_tween()
+	_hit_flash_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_hit_flash_tween.tween_property(_sprite, "modulate", Color.WHITE, 0.18)
 
 
 # An enemy only fights a player that exists, is alive and is within detection range.
@@ -254,6 +270,9 @@ func _on_animation_finished() -> void:
 
 func _die() -> void:
 	is_dead = true
+	if _hit_flash_tween and _hit_flash_tween.is_valid():
+		_hit_flash_tween.kill()
+	_sprite.modulate = HIT_FLASH
 	_swinging = false
 	_cancel_swing_effects()
 	died.emit(points)

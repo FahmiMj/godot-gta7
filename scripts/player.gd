@@ -9,6 +9,9 @@ extends CharacterBody2D
 const TRAIL_SHADER := preload("res://assets/shaders/flash_step_trail.gdshader")
 const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
 
+## Tint used for the brief red flash when the player is hit.
+const HIT_FLASH := Color(1.8, 0.3, 0.3)
+
 ## The cast animation faces right, so a leftward throw only flips the sprite.
 const HAND_OFFSET := Vector2(64.0, -71.0)
 
@@ -56,6 +59,7 @@ signal died
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var flash_step_sound: AudioStreamPlayer = $FlashStepSound
+@onready var hurt_sound: AudioStreamPlayer = $HurtSound
 
 var health: int = 200
 var mana: int = 100
@@ -70,6 +74,7 @@ var _reviving: bool = false
 var _attack_cooldown_left: float = 0.0
 var _melee_cooldown_left: float = 0.0
 var _trail_material: ShaderMaterial
+var _hit_flash_tween: Tween
 
 
 func _ready() -> void:
@@ -201,8 +206,20 @@ func take_damage(amount: int) -> void:
 	health = maxi(0, health - amount)
 	_health_regen_timer = 0.0
 	health_changed.emit(health, max_health)
+	_flash_hit()
+	hurt_sound.play()
 	if health <= 0:
 		_die()
+
+
+## Flashes the sprite red for a beat so a hit is readable at a glance.
+func _flash_hit() -> void:
+	if _hit_flash_tween and _hit_flash_tween.is_valid():
+		_hit_flash_tween.kill()
+	sprite.modulate = HIT_FLASH
+	_hit_flash_tween = create_tween()
+	_hit_flash_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_hit_flash_tween.tween_property(sprite, "modulate", Color.WHITE, 0.18)
 
 
 func _die() -> void:
@@ -227,6 +244,7 @@ func revive() -> void:
 		return
 	_reviving = true
 	sprite.flip_h = false
+	sprite.modulate = Color.WHITE
 	sprite.play_backwards("wither")
 	await sprite.animation_finished
 	health = max_health
