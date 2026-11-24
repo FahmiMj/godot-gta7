@@ -1,0 +1,32 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://b3slshfx8q4wn"]
+
+[ext_resource type="Texture2D" uid="uid://7qarjj1027b8" path="res://assets/goblin_sprites/goblin_slash.png" id="1_slash"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0"]
+atlas = ExtResource("1_slash")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1"]
+atlas = ExtResource("1_slash")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2"]
+atlas = ExtResource("1_slash")
+region = Rect2(256, 0, 128, 128)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2")
+}],
+"loop": false,
+"name": &"slash",
+"speed": 15.0
+}]

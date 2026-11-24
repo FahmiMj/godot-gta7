@@ -1,9 +1,11 @@
-[gd_scene format=3 uid="uid://b62pkp2gxhpxh"]
+
+[gd_scene load_steps=8 format=3 uid="uid://b62pkp2gxhpxh"]
 
 [ext_resource type="Texture2D" uid="uid://dkh170sren6tb" path="res://assets/arena_map.png" id="1_map"]
 [ext_resource type="Script" uid="uid://dwwbgmf2yjxmo" path="res://scripts/torch_flicker.gd" id="2_flicker"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
-[ext_resource type="Script" path="res://scripts/debug_ui.gd" id="4_debug"]
+[ext_resource type="PackedScene" path="res://enemy/goblin_wave.tscn" id="4_wave"]
+[ext_resource type="Script" path="res://scripts/debug_ui.gd" id="5_debug"]
 
 [sub_resource type="Gradient" id="Gradient_light"]
 offsets = PackedFloat32Array(0, 0.42, 0.78, 1)
@@ -61,8 +63,10 @@ texture = SubResource("GradientTexture2D_light")
 texture_scale = 3.0
 script = ExtResource("2_flicker")
 
+[node name="GoblinWave" parent="." instance=ExtResource("4_wave")]
+
 [node name="DebugUI" type="CanvasLayer" parent="."]
-script = ExtResource("4_debug")
+script = ExtResource("5_debug")
 
 [node name="Panel" type="PanelContainer" parent="DebugUI"]
 offset_left = 16.0

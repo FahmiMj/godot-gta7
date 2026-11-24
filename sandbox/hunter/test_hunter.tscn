@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://d3hnt7q2w8k4m"]
+
+[ext_resource type="Script" path="res://sandbox/hunter/test_player.gd" id="1_tp"]
+[ext_resource type="Texture2D" uid="uid://de7qg1kpucett" path="res://icon.svg" id="2_icon"]
+[ext_resource type="PackedScene" uid="uid://c5spw7n3q9x2h" path="res://enemy/spawner.tscn" id="3_spw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 14.0
+
+[node name="TestHunter" type="Node2D"]
+
+[node name="Player" type="CharacterBody2D" parent="."]
+collision_layer = 2
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1_tp")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_icon")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("CircleShape2D_player")
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+
+[node name="SpawnPoint1" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(-150, -150)
+
+[node name="SpawnPoint2" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(150, -150)
+
+[node name="SpawnPoint3" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(-150, 150)
+
+[node name="SpawnPoint4" type="Marker2D" parent="." groups=["spawn_points"]]
+position = Vector2(150, 150)
+
+[node name="Spawner" parent="." instance=ExtResource("3_spw")]

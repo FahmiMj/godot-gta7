@@ -11,11 +11,14 @@ const GLOW_SIZE := 32
 
 @export var speed: float = 620.0
 @export var max_distance: float = 1400.0
+## Health taken from each enemy the ball passes through (once per enemy).
+@export var damage: int = 10
 
 var _direction: Vector2 = Vector2.RIGHT
 var _travelled: float = 0.0
 var _time: float = 0.0
 var _core: Sprite2D
+var _already_hit: Array[Node2D] = []
 
 static var _glow_texture: Texture2D
 
@@ -53,6 +56,8 @@ func setup(target: Vector2) -> void:
 
 
 func _ready() -> void:
+	$HitBox.body_entered.connect(_on_hitbox_body_entered)
+
 	var glow := Sprite2D.new()
 	glow.name = "Glow"
 	glow.texture = glow_texture()
@@ -107,6 +112,13 @@ func _physics_process(delta: float) -> void:
 
 	if _travelled >= max_distance:
 		_burst()
+
+
+func _on_hitbox_body_entered(body: Node2D) -> void:
+	if body in _already_hit or not body.has_method("take_damage"):
+		return
+	_already_hit.append(body)
+	body.take_damage(damage)
 
 
 func _burst() -> void:

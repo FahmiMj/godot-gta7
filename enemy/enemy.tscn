@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b4y8k14600n4l"]
+
+[ext_resource type="Script" uid="uid://4mnlgd5uugjx" path="res://enemy/enemy.gd" id="1_ofsxj"]
+[ext_resource type="SpriteFrames" uid="uid://c7gblnfr4m2xk" path="res://assets/goblin_sprites/goblin_frames.tres" id="2_frames"]
+[ext_resource type="SpriteFrames" uid="uid://b3slshfx8q4wn" path="res://assets/goblin_sprites/goblin_slash_frames.tres" id="3_slash"]
+[ext_resource type="AudioStream" uid="uid://cqrc7dwlr45jt" path="res://assets/audio/goblin_swing.wav" id="4_swing"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ofsxj"]
+radius = 26.0
+
+[node name="Goblin" type="CharacterBody2D" unique_id=1790454056]
+collision_layer = 4
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_ofsxj")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=203520223]
+position = Vector2(0, -78)
+texture_filter = 1
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=225449678]
+shape = SubResource("CircleShape2D_ofsxj")
+
+[node name="AttackTimer" type="Timer" parent="." unique_id=1938475621]
+one_shot = true
+
+[node name="SlashEffect" type="AnimatedSprite2D" parent="."]
+visible = false
+position = Vector2(21, -72)
+texture_filter = 1
+sprite_frames = ExtResource("3_slash")
+animation = &"slash"
+
+[node name="SwingSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_swing")
+volume_db = -4.0
