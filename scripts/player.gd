@@ -4,7 +4,7 @@ extends CharacterBody2D
 ## Animations are named "<state>_<facing>", e.g. walk_left / idle_up.
 ## The sprite sheet has 5 rows: down, up, left, right, idle.
 ## Q flash steps forward, E conjures and hurls dark fire toward the cursor,
-## left click swings a punch in the current facing direction.
+## left click turns and lunges a punch toward the cursor.
 
 const TRAIL_SHADER := preload("res://assets/shaders/flash_step_trail.gdshader")
 const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
@@ -184,6 +184,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if _melee_cooldown_left <= 0.0 and not _casting and not _melee_attacking:
+			_face_toward(get_canvas_transform().affine_inverse() * event.position)
 			_melee_attack()
 			get_viewport().set_input_as_handled()
 		return
@@ -353,10 +354,12 @@ func _melee_attack() -> void:
 	sprite.play(anim)
 
 	# lunge a short step in the attack direction so the punch feels weighty
-	var lunge_target := global_position + _facing_vector() * melee_lunge_distance
-	var lunge := create_tween()
-	lunge.tween_property(self, "global_position", lunge_target, melee_lunge_time)
-	lunge.tween_callback(lunge.kill)
+	var direction := _facing_vector()
+	var lunge_target := _step_target(global_position, direction * melee_lunge_distance)
+	# don't step backwards when a wall already sits inside the lunge's margin
+	if (lunge_target - global_position).dot(direction) > 4.0:
+		var lunge := create_tween()
+		lunge.tween_property(self, "global_position", lunge_target, melee_lunge_time)
 
 	# the punch lands immediately: hurt anything in reach in front of us
 	_hit_enemies_in_front(melee_damage, melee_range)
@@ -401,6 +404,17 @@ func _throw_dark_fire(spawn_position: Vector2) -> void:
 	get_parent().add_child(fire)
 	fire.global_position = spawn_position
 	fire.setup(target)
+
+
+## Snaps the attack direction to the nearest of the four animation rows.
+func _face_toward(world_point: Vector2) -> void:
+	var aim := world_point - global_position
+	if aim.length_squared() < 4.0:
+		return
+	if absf(aim.x) > absf(aim.y):
+		_facing = "right" if aim.x > 0.0 else "left"
+	else:
+		_facing = "down" if aim.y > 0.0 else "up"
 
 
 func _facing_vector() -> Vector2:
