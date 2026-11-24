@@ -3,7 +3,8 @@ extends CharacterBody2D
 ##
 ## Animations are named "<state>_<facing>", e.g. walk_left / idle_up.
 ## The sprite sheet has 5 rows: down, up, left, right, idle.
-## Q flash steps forward, E conjures and hurls dark fire toward the cursor.
+## Q flash steps forward, E conjures and hurls dark fire toward the cursor,
+## left click swings a punch in the current facing direction.
 
 const TRAIL_SHADER := preload("res://assets/shaders/flash_step_trail.gdshader")
 const DARK_FIRE_SCENE := preload("res://scenes/dark_fire.tscn")
@@ -23,6 +24,8 @@ const HAND_OFFSET := Vector2(64.0, -71.0)
 @export var flash_step_trail_fade: float = 0.3
 ## Time between dark fire throws, in seconds.
 @export var attack_cooldown: float = 1.0
+## Time between melee swings, in seconds.
+@export var melee_cooldown: float = 0.45
 
 signal health_changed(current: int, maximum: int)
 signal died
@@ -34,9 +37,11 @@ var health: int = 200
 var _facing: String = "down"
 var _flash_stepping: bool = false
 var _casting: bool = false
+var _melee_attacking: bool = false
 var _dead: bool = false
 var _reviving: bool = false
 var _attack_cooldown_left: float = 0.0
+var _melee_cooldown_left: float = 0.0
 var _trail_material: ShaderMaterial
 
 
@@ -49,12 +54,18 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_attack_cooldown_left = maxf(0.0, _attack_cooldown_left - delta)
+	_melee_cooldown_left = maxf(0.0, _melee_cooldown_left - delta)
 
 	if _dead:
 		velocity = Vector2.ZERO
 		return
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+
+	# planting the feet mid-swing is what sells the punch
+	if _melee_attacking:
+		velocity = Vector2.ZERO
+		return
 
 	velocity = input_dir * speed
 	move_and_slide()
@@ -84,6 +95,11 @@ func _play(state: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _dead:
 		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if _melee_cooldown_left <= 0.0 and not _casting and not _melee_attacking:
+			_melee_attack()
+			get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("flash_step") and not _flash_stepping:
 		_flash_step()
 	elif event.is_action_pressed("attack") and _attack_cooldown_left <= 0.0 and not _casting:
@@ -104,6 +120,7 @@ func _die() -> void:
 		return
 	_dead = true
 	_casting = false
+	_melee_attacking = false
 	velocity = Vector2.ZERO
 	sprite.flip_h = false
 	sprite.play("wither")
@@ -126,6 +143,7 @@ func revive() -> void:
 	_dead = false
 	_reviving = false
 	_casting = false
+	_melee_attacking = false
 	_facing = "down"
 	health_changed.emit(health, max_health)
 	_play("idle")
@@ -173,6 +191,28 @@ func _spawn_trail() -> void:
 		var tween := ghost.create_tween()
 		tween.tween_property(ghost, "modulate:a", 0.0, flash_step_trail_fade)
 		tween.tween_callback(ghost.queue_free)
+
+
+## Swings the punch that matches the way the player is currently facing.
+## The sheet already has a dedicated row per direction, so no flipping is
+## needed - attack_left really is drawn facing left.
+func _melee_attack() -> void:
+	_melee_attacking = true
+	_melee_cooldown_left = melee_cooldown
+	velocity = Vector2.ZERO
+	sprite.flip_h = false
+
+	var anim := "attack_%s" % _facing
+	if not sprite.sprite_frames.has_animation(anim):
+		anim = "attack_down"
+	sprite.play(anim)
+
+	await sprite.animation_finished
+	_melee_attacking = false
+	# dying mid-swing hands the sprite over to the wither animation
+	if _dead or _reviving:
+		return
+	_play("idle")
 
 
 ## Plays the conjure animation and releases the ball when the hand is thrust out.
