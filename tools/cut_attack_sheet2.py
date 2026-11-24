@@ -20,7 +20,14 @@ BODY_CX = CELL_W // 2      # body centre inside the cell
 FEET_Y = CELL_H - 3        # baseline, matches the walk sprites
 TARGET_BODY_H = 169        # walk sprite body height in player_sheet.png
 
-ROWS = ["down", "up", "left", "right"]  # special attack row is not used yet
+# row index in the sheet -> direction written to disk. The sheet's own "Left
+# Attack" row is drawn mirrored, so both sideways attacks are cut from the
+# "Right Attack" row and the left one is flipped. The special row is skipped.
+ROWS = {"down": 0, "up": 1, "right": 3}
+
+# The 5th pose is a duplicate of the 1st, so only the first four are cut and
+# the last frame of every animation reuses the opening pose.
+FRAME_COLUMNS = 4
 
 
 def load(path):
@@ -127,14 +134,19 @@ def main():
     assert len(bands) >= 4, bands
 
     crops = {}   # direction -> list of (image, body box)
-    for name, (y0, y1) in zip(ROWS, bands):
+    for name, row in ROWS.items():
+        y0, y1 = bands[row]
+        spans = frame_spans(im, y0, y1)
+        spans = spans[:FRAME_COLUMNS]
         crops[name] = []
-        for a, b in frame_spans(im, y0, y1):
+        for a, b in spans:
             crop = im.crop((a, y0, b + 1, y1 + 1))
             bb = crop.getbbox()
             crop = crop.crop(bb)
             crops[name].append((crop, body_box(crop)))
-        print(name, len(crops[name]), "frames")
+        # closing frame = opening pose
+        crops[name].append(crops[name][0])
+        print(name, "row", row, "->", len(crops[name]), "frames")
 
     heights = sorted(b[3] - b[1] + 1 for frames in crops.values() for _, b in frames if b)
     scale = TARGET_BODY_H / heights[len(heights) // 2]
@@ -158,6 +170,16 @@ def main():
         path = f"{OUT}/attack_{name}.png"
         out.save(path)
         print("wrote", path, out.size)
+
+    # the left attack is the right attack mirrored, frame by frame, so the
+    # character keeps the exact same position in the cell
+    right = Image.open(f"{OUT}/attack_right.png").convert("RGBA")
+    left = Image.new("RGBA", right.size, (0, 0, 0, 0))
+    for i in range(right.width // CELL_W):
+        cell = right.crop((i * CELL_W, 0, (i + 1) * CELL_W, CELL_H))
+        left.alpha_composite(cell.transpose(Image.Transpose.FLIP_LEFT_RIGHT), (i * CELL_W, 0))
+    left.save(f"{OUT}/attack_left.png")
+    print("wrote", f"{OUT}/attack_left.png", left.size, "(mirrored right)")
 
 
 if __name__ == "__main__":
