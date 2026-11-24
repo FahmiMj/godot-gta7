@@ -26,6 +26,14 @@ const HAND_OFFSET := Vector2(64.0, -71.0)
 @export var attack_cooldown: float = 1.0
 ## Time between melee swings, in seconds.
 @export var melee_cooldown: float = 0.45
+## Health taken from each enemy the punch reaches.
+@export var melee_damage: int = 25
+## How far the punch reaches in front of the player, in pixels.
+@export var melee_range: float = 100.0
+## Health taken from each enemy the flash step passes through.
+@export var flash_damage: int = 15
+## How close to the dash line an enemy must be to be hit, in pixels.
+@export var flash_hit_radius: float = 44.0
 
 signal health_changed(current: int, maximum: int)
 signal died
@@ -115,6 +123,13 @@ func take_damage(amount: int) -> void:
 		_die()
 
 
+func heal(amount: int) -> void:
+	if _dead or _reviving:
+		return
+	health = mini(max_health, health + amount)
+	health_changed.emit(health, max_health)
+
+
 func _die() -> void:
 	if _dead:
 		return
@@ -154,11 +169,49 @@ func _flash_step() -> void:
 	_flash_stepping = true
 	_spawn_trail()
 	flash_step_sound.play()
+	# damage any enemy swept through on the dash line
+	var dash_start := global_position
+	var dash_end := dash_start + _facing_vector() * flash_step_distance
+	_hit_enemies_along_segment(dash_start, dash_end, flash_damage, flash_hit_radius)
 	sprite.visible = false
-	global_position += _facing_vector() * flash_step_distance
+	global_position = dash_end
 	await get_tree().create_timer(flash_step_hide_time).timeout
 	sprite.visible = true
 	_flash_stepping = false
+
+
+## Damages every enemy whose center is within range and roughly in front of the
+## player (used for the melee punch).
+func _hit_enemies_in_front(damage: int, range: float) -> void:
+	var forward := _facing_vector()
+	var origin := global_position
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or not enemy.has_method("take_damage"):
+			continue
+		var to: Vector2 = enemy.global_position - origin
+		if to.length() > range:
+			continue
+		if to.dot(forward) < -16.0:
+			continue
+		enemy.take_damage(damage)
+
+
+## Damages every enemy whose center lies within radius of the line segment
+## start->end (used for the flash step dash).
+func _hit_enemies_along_segment(start: Vector2, end: Vector2, damage: int, radius: float) -> void:
+	var segment := end - start
+	var length := segment.length()
+	if length <= 0.0:
+		return
+	var direction := segment / length
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or not enemy.has_method("take_damage"):
+			continue
+		var to: Vector2 = enemy.global_position - start
+		var t := clampf(to.dot(direction), 0.0, length)
+		var closest := start + direction * t
+		if enemy.global_position.distance_to(closest) <= radius:
+			enemy.take_damage(damage)
 
 
 ## Leaves flat white silhouettes of the current frame along the travel path.
@@ -206,6 +259,9 @@ func _melee_attack() -> void:
 	if not sprite.sprite_frames.has_animation(anim):
 		anim = "attack_down"
 	sprite.play(anim)
+
+	# the punch lands immediately: hurt anything in reach in front of us
+	_hit_enemies_in_front(melee_damage, melee_range)
 
 	await sprite.animation_finished
 	_melee_attacking = false

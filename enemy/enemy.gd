@@ -44,6 +44,7 @@ var _detour: Vector2 = Vector2.ZERO
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var _slash: AnimatedSprite2D = $SlashEffect
 @onready var _swing_sound: AudioStreamPlayer2D = $SwingSound
+@onready var _health_bar: EnemyHealthBar = $HealthBar
 
 
 func _ready() -> void:
@@ -81,6 +82,7 @@ func take_damage(amount: int) -> void:
 	if is_dead:
 		return
 	_health -= amount
+	_health_bar.set_health(_health, max_health)
 	if _health <= 0:
 		_die()
 	else:

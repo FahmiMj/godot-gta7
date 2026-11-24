@@ -4,6 +4,7 @@
 [ext_resource type="SpriteFrames" uid="uid://c7gblnfr4m2xk" path="res://assets/goblin_sprites/goblin_frames.tres" id="2_frames"]
 [ext_resource type="SpriteFrames" uid="uid://b3slshfx8q4wn" path="res://assets/goblin_sprites/goblin_slash_frames.tres" id="3_slash"]
 [ext_resource type="AudioStream" uid="uid://cqrc7dwlr45jt" path="res://assets/audio/goblin_swing.wav" id="4_swing"]
+[ext_resource type="Script" path="res://enemy/health_bar.gd" id="5_healthbar"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ofsxj"]
 radius = 26.0
@@ -25,6 +26,10 @@ shape = SubResource("CircleShape2D_ofsxj")
 
 [node name="AttackTimer" type="Timer" parent="." unique_id=1938475621]
 one_shot = true
+
+[node name="HealthBar" type="Node2D" parent="."]
+position = Vector2(0, -112)
+script = ExtResource("5_healthbar")
 
 [node name="SlashEffect" type="AnimatedSprite2D" parent="."]
 visible = false
