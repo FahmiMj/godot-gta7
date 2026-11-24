@@ -14,6 +14,9 @@ const HIT_FLASH := Color(1.8, 0.3, 0.3)
 
 ## The cast animation faces right, so a leftward throw only flips the sprite.
 const HAND_OFFSET := Vector2(64.0, -71.0)
+## Physics layer the arena walls sit on. Dashes look only at walls, so they still
+## pass through enemies (flash step damages whatever it sweeps through).
+const WALL_MASK: int = 1
 
 @export var speed: float = 400.0
 @export var max_health: int = 200
@@ -43,7 +46,7 @@ const HAND_OFFSET := Vector2(64.0, -71.0)
 ## Health taken from each enemy the punch reaches.
 @export var melee_damage: int = 25
 ## How far the punch reaches in front of the player, in pixels.
-@export var melee_range: float = 100.0
+@export var melee_range: float = 136.0
 ## How far the character lunges forward when swinging, in pixels.
 @export var melee_lunge_distance: float = 40.0
 ## How long the lunge takes, in seconds.
@@ -280,10 +283,11 @@ func _flash_step() -> void:
 
 
 ## Damages every enemy whose center is within range and roughly in front of the
-## player (used for the melee punch).
-func _hit_enemies_in_front(damage: int, range: float) -> void:
+## player (used for the melee punch). Returns how many it hit.
+func _hit_enemies_in_front(damage: int, range: float) -> int:
 	var forward := _facing_vector()
 	var origin := global_position
+	var hits := 0
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if not is_instance_valid(enemy) or not enemy.has_method("take_damage"):
 			continue
@@ -293,6 +297,8 @@ func _hit_enemies_in_front(damage: int, range: float) -> void:
 		if to.dot(forward) < -16.0:
 			continue
 		enemy.take_damage(damage)
+		hits += 1
+	return hits
 
 
 ## Damages every enemy whose center lies within radius of the line segment
@@ -313,9 +319,10 @@ func _hit_enemies_along_segment(start: Vector2, end: Vector2, damage: int, radiu
 			enemy.take_damage(damage)
 
 
-## Stops a teleport at the first wall so flash step cannot leave the arena.
-func _step_target(origin: Vector2, offset: Vector2) -> Vector2:
-	var query := PhysicsRayQueryParameters2D.create(origin, origin + offset, collision_mask)
+## Stops a dash at the first wall so it cannot leave the arena. Enemies are not
+## considered: flash step and the punch lunge both pass over their bodies.
+func _step_target(origin: Vector2, offset: Vector2, mask: int = WALL_MASK) -> Vector2:
+	var query := PhysicsRayQueryParameters2D.create(origin, origin + offset, mask)
 	query.exclude = [get_rid()]
 	var hit := get_world_2d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
@@ -371,16 +378,18 @@ func _melee_attack() -> void:
 		anim = "attack_down"
 	sprite.play(anim)
 
-	# lunge a short step in the attack direction so the punch feels weighty
-	var direction := _facing_vector()
-	var lunge_target := _step_target(global_position, direction * melee_lunge_distance)
-	# don't step backwards when a wall already sits inside the lunge's margin
-	if (lunge_target - global_position).dot(direction) > 4.0:
-		var lunge := create_tween()
-		lunge.tween_property(self, "global_position", lunge_target, melee_lunge_time)
-
 	# the punch lands immediately: hurt anything in reach in front of us
-	_hit_enemies_in_front(melee_damage, melee_range)
+	var hits := _hit_enemies_in_front(melee_damage, melee_range)
+
+	# lunge a short step in the attack direction so the punch feels weighty. Not
+	# when it already connected, though: that would step onto the goblin's sprite.
+	if hits == 0:
+		var direction := _facing_vector()
+		var lunge_target := _step_target(global_position, direction * melee_lunge_distance)
+		# don't step backwards when a wall already sits inside the lunge's margin
+		if (lunge_target - global_position).dot(direction) > 4.0:
+			var lunge := create_tween()
+			lunge.tween_property(self, "global_position", lunge_target, melee_lunge_time)
 
 	await sprite.animation_finished
 	_melee_attacking = false

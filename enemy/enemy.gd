@@ -22,12 +22,15 @@ static var _slots_updated: int = -1000000
 @export var speed: float = 130.0
 @export var max_health: int = 30
 @export var points: int = 5
-@export var detection_range: float = 250.0
-@export var attack_range: float = 96.0
+## Sight radius. Far wider than the arena, so a goblin that has spawned locks
+## on and comes for the player instead of idling out of range.
+@export var detection_range: float = 2000.0
+@export var attack_range: float = 128.0
 @export var attack_damage: int = 10
 @export var attack_cooldown: float = 1.0
-## Distance between the player and each enemy's standing slot.
-@export var slot_distance: float = 76.0
+## Distance between the player and each enemy's standing slot. The art is about
+## 110 px wide, so this keeps a goblin off the player's sprite while it swings.
+@export var slot_distance: float = 112.0
 ## Enemies closer than this push each other apart.
 @export var separation_radius: float = 56.0
 
