@@ -6,6 +6,7 @@ extends Sprite2D
 
 @export var fps: float = 10.0
 @export var ember_count: int = 10
+@export var ember_color: Color = Color(1.0, 0.62, 0.2, 0.85)
 
 var _time: float = 0.0
 
@@ -49,7 +50,7 @@ func _spawn_embers() -> void:
 	embers.initial_velocity_max = 42.0
 	embers.scale_amount_min = 0.35
 	embers.scale_amount_max = 0.8
-	embers.color = Color(1.0, 0.62, 0.2, 0.85)
+	embers.color = ember_color
 	embers.texture = _ember_texture_instance()
 	embers.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	embers.material = _ember_material_instance()

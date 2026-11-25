@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwrwvaml0f0m"
-path="res://.godot/imported/heal_portion.webp-aea2179bef3bf6dbcc95a84da1558901.ctex"
+uid="uid://ccsavm2cfh2pw"
+path="res://.godot/imported/taunt_2_sheet.png-a8fa5adee4f8af37c5f61375e5f4bcc6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/portions/heal_portion.webp"
-dest_files=["res://.godot/imported/heal_portion.webp-aea2179bef3bf6dbcc95a84da1558901.ctex"]
+source_file="res://assets/goblin_sprites/taunt_2_sheet.png"
+dest_files=["res://.godot/imported/taunt_2_sheet.png-a8fa5adee4f8af37c5f61375e5f4bcc6.ctex"]
 
 [params]
 

@@ -1,12 +1,9 @@
 [gd_scene format=3 uid="uid://c5spw7n3rax2h"]
 
 [ext_resource type="Script" uid="uid://djtpj8xq1ygkl" path="res://enemy/spawner.gd" id="1_spw"]
-[ext_resource type="PackedScene" uid="uid://b4y8k14600n4l" path="res://enemy/enemy.tscn" id="2_enemy"]
 [ext_resource type="PackedScene" uid="uid://c8tbx5k2m4n1q" path="res://enemy/treasure_box.tscn" id="3_box"]
 
 [node name="Spawner" type="Node"]
 script = ExtResource("1_spw")
-enemy_scene = ExtResource("2_enemy")
 treasure_scene = ExtResource("3_box")
-enemy_count = 3
 spawn_spread = 120.0

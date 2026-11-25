@@ -1,0 +1,75 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/goblin_sprites/spear_sheet.png" id="1_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f2"]
+atlas = ExtResource("1_sheet")
+region = Rect2(0, 0, 136, 172)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f5"]
+atlas = ExtResource("1_sheet")
+region = Rect2(136, 0, 136, 172)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f9"]
+atlas = ExtResource("1_sheet")
+region = Rect2(272, 0, 136, 172)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f11"]
+atlas = ExtResource("1_sheet")
+region = Rect2(408, 0, 136, 172)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7"]
+atlas = ExtResource("1_sheet")
+region = Rect2(544, 0, 136, 172)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f8"]
+atlas = ExtResource("1_sheet")
+region = Rect2(680, 0, 136, 172)
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f11")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f9")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f2")}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f11")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f9")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f2")}],
+"loop": true,
+"name": &"walk_side",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f11")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f9")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f2")}],
+"loop": true,
+"name": &"walk_up",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f11")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f9")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f2")}],
+"loop": true,
+"name": &"walk_down",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f5")}, {"duration": 1.0, "texture": SubResource("AtlasTexture_f8")}],
+"loop": false,
+"name": &"prep",
+"speed": 5.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f7")}],
+"loop": false,
+"name": &"throw",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f11")}],
+"loop": false,
+"name": &"hurt",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f11")}],
+"loop": false,
+"name": &"death",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("AtlasTexture_f7")}],
+"loop": false,
+"name": &"attack",
+"speed": 1.0
+}]

@@ -10,7 +10,7 @@ const CORE_SCALE := 0.5
 const GLOW_SIZE := 32
 
 @export var speed: float = 620.0
-@export var max_distance: float = 1400.0
+@export var max_distance: float = 2800.0
 ## Health taken from each enemy the ball passes through (once per enemy).
 @export var damage: int = 10
 

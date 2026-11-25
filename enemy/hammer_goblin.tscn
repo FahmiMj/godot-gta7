@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://b4y8k14600n4l" path="res://enemy/enemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://enemy/hammer_goblin.gd" id="2_script"]
+[ext_resource type="SpriteFrames" path="res://assets/goblin_sprites/hammer_frames.tres" id="3_frames"]
+
+[ext_resource type="SpriteFrames" path="res://assets/goblin_sprites/taunt_3_frames.tres" id="9_taunt"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hammer"]
+radius = 34.0
+
+[node name="HammerGoblin" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+taunt_frames = ExtResource("9_taunt")
+taunt_position_y = -99.0
+speed = 85.0
+max_health = 60
+points = 15
+detection_range = 460.0
+attack_damage = 30
+attack_cooldown = 2.6
+hp_bar_height = 168.0
+walk_bob = 5.0
+death_tips_over = true
+skin_color = Color(0.3, 0.5, 0.22, 1)
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+position = Vector2(0, -92)
+sprite_frames = ExtResource("3_frames")
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_hammer")

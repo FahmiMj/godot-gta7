@@ -4,8 +4,9 @@
 [ext_resource type="SpriteFrames" uid="uid://c7gblnfr4m2xk" path="res://assets/goblin_sprites/goblin_frames.tres" id="2_frames"]
 [ext_resource type="SpriteFrames" uid="uid://b3slshfx8q4wn" path="res://assets/goblin_sprites/goblin_slash_frames.tres" id="3_slash"]
 [ext_resource type="AudioStream" uid="uid://cqrc7dwlr45jt" path="res://assets/audio/goblin_swing.wav" id="4_swing"]
-[ext_resource type="Script" path="res://enemy/health_bar.gd" id="5_healthbar"]
 [ext_resource type="AudioStream" path="res://assets/audio/oof.wav" id="6_hurt"]
+
+[ext_resource type="SpriteFrames" path="res://assets/goblin_sprites/taunt_1_frames.tres" id="9_taunt"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ofsxj"]
 radius = 26.0
@@ -15,6 +16,8 @@ collision_layer = 4
 collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_ofsxj")
+taunt_frames = ExtResource("9_taunt")
+taunt_position_y = -55.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=203520223]
 position = Vector2(0, -78)
@@ -27,10 +30,6 @@ shape = SubResource("CircleShape2D_ofsxj")
 
 [node name="AttackTimer" type="Timer" parent="." unique_id=1938475621]
 one_shot = true
-
-[node name="HealthBar" type="Node2D" parent="."]
-position = Vector2(0, -112)
-script = ExtResource("5_healthbar")
 
 [node name="SlashEffect" type="AnimatedSprite2D" parent="."]
 visible = false
