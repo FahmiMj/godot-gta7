@@ -12,7 +12,7 @@ enum State { SPAWN, IDLE, WALK, WINDUP, SCREAM, TELEPORT_OUT, TELEPORT_IN, DEAD 
 @export var speed: float = 85.0
 @export var max_health: int = 80
 @export var points: int = 15
-@export var detection_range: float = 400.0
+@export var detection_range: float = 100000.0
 ## It floats toward the Hero until this close, then hovers.
 @export var hover_distance: float = 170.0
 ## The scream only drains mana from a Hero this close.

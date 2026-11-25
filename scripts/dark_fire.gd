@@ -1,9 +1,9 @@
 extends Node2D
 ## The dark fire ball thrown by the player.
 ##
-## The ball itself is the mage's own fire art from the attack sheet, wrapped in
-## a warm additive glow, trailing embers, and bursting when it has flown far
-## enough.
+## The ball is the mage's own fire art from the attack sheet, wrapped in a warm
+## additive glow and trailing embers. It locks onto a body picked near the
+## cursor, curves toward it, and detonates on impact for area damage.
 
 const BALL_TEXTURE := preload("res://assets/sprites/dark_fire_ball.png")
 const CORE_SCALE := 0.5
@@ -11,14 +11,19 @@ const GLOW_SIZE := 32
 
 @export var speed: float = 620.0
 @export var max_distance: float = 2800.0
-## Health taken from each enemy the ball passes through (once per enemy).
+## Radius of the impact explosion, in pixels.
+@export var blast_radius: float = 136.0
+## How quickly the ball can turn toward its locked target, in radians per second.
+@export var turn_rate: float = 12.0
+## Health taken from each enemy caught in the impact blast.
 @export var damage: int = 10
 
 var _direction: Vector2 = Vector2.RIGHT
 var _travelled: float = 0.0
 var _time: float = 0.0
 var _core: Sprite2D
-var _already_hit: Array[Node2D] = []
+var _target: Node2D
+var _exploded: bool = false
 
 static var _glow_texture: Texture2D
 
@@ -48,11 +53,28 @@ static func additive_material() -> CanvasItemMaterial:
 	return material
 
 
-## Aims the ball at a world-space point.
-func setup(target: Vector2) -> void:
-	var offset := target - global_position
+## Aims the ball at a world-space point and optionally locks onto a body.
+func setup(target: Vector2, lock: Node2D = null) -> void:
+	_target = lock if is_instance_valid(lock) and Combat.is_alive(lock) else null
+	var aim_point := target
+	if _target != null:
+		aim_point = _target.global_position
+	var offset := aim_point - global_position
 	_direction = Vector2.RIGHT if offset.length_squared() < 0.01 else offset.normalized()
 	rotation = _direction.angle()
+
+
+## Curves the ball toward the body it locked onto when the cast began.
+func _home(delta: float) -> void:
+	if not is_instance_valid(_target) or not Combat.is_alive(_target):
+		_target = null
+		return
+	var desired := _target.global_position - global_position
+	if desired.length_squared() < 0.01:
+		return
+	var turn := clampf(_direction.angle_to(desired.normalized()),
+			-turn_rate * delta, turn_rate * delta)
+	_direction = _direction.rotated(turn)
 
 
 func _ready() -> void:
@@ -102,6 +124,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_time += delta
+	_home(delta)
 	var step := speed * delta
 	position += _direction * step
 	_travelled += step
@@ -110,18 +133,46 @@ func _physics_process(delta: float) -> void:
 	if _core != null:
 		_core.scale = Vector2(CORE_SCALE, CORE_SCALE) * (1.0 + 0.06 * sin(_time * 34.0))
 
+	queue_redraw()
+
 	if _travelled >= max_distance:
-		_burst()
+		_explode()
 
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	if body in _already_hit or not body.has_method("take_damage"):
+	if _exploded or body == null or not body.has_method("take_damage"):
 		return
-	_already_hit.append(body)
-	body.take_damage(damage)
+	_explode()
 
 
-func _burst() -> void:
+## Two counter-spinning arcs around the core, so the ball looks like live fire.
+func _draw() -> void:
+	var radius := 19.0 + 2.0 * sin(_time * 20.0)
+	draw_arc(Vector2.ZERO, radius, _time * 6.0, _time * 6.0 + PI * 1.3, 24,
+			Color(0.8, 0.5, 1.0, 0.6), 3.0, true)
+	draw_arc(Vector2.ZERO, radius * 0.7, -_time * 9.0, -_time * 9.0 + PI, 18,
+			Color(1.0, 0.9, 1.0, 0.45), 1.5, true)
+
+
+## Blows up where the ball is: every body inside blast_radius takes the hit,
+## then the ball leaves a ring and embers and frees itself.
+func _explode() -> void:
+	if _exploded:
+		return
+	_exploded = true
+	var tree := get_tree()
+	var targets := Combat.hits_in_circle(tree, global_position, blast_radius)
+	Combat.damage(targets, damage)
+	CombatFx.shockwave(get_parent(), global_position, blast_radius)
+	CombatFx.burst(get_parent(), global_position, Color(0.82, 0.55, 1.0), 28, 0.5,
+			70.0, 230.0, Vector2.UP, 180.0, 0.0)
+	CombatFx.shake(tree, 6.0, 0.2)
+	_spawn_burst()
+	queue_free()
+
+
+## The one-shot ember spray left at the impact point.
+func _spawn_burst() -> void:
 	var burst := CPUParticles2D.new()
 	burst.name = "DarkFireBurst"
 	burst.texture = glow_texture()
@@ -141,4 +192,3 @@ func _burst() -> void:
 	burst.global_position = global_position
 	burst.emitting = true
 	get_tree().create_timer(1.0).timeout.connect(burst.queue_free)
-	queue_free()

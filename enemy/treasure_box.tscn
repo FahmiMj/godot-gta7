@@ -5,10 +5,10 @@
 [ext_resource type="Texture2D" path="res://assets/portions/wave_1.webp" id="3_potion"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_chest"]
-size = Vector2(128, 102)
+size = Vector2(192, 150)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_potion"]
-radius = 44.0
+radius = 80.0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_potion"]
 blend_mode = 1
@@ -56,5 +56,5 @@ position = Vector2(-60, -170)
 scale = Vector2(2, 2)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
-text = "Double-click to open"
+text = "Click to open"
 horizontal_alignment = 1

@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_script"]
 [ext_resource type="SpriteFrames" path="res://assets/player_frames.tres" id="2_frames"]
 [ext_resource type="AudioStream" path="res://assets/sounds/flash_step.wav" id="3_sfx"]
 [ext_resource type="Script" path="res://scripts/camera_follow.gd" id="4_camera"]
 [ext_resource type="AudioStream" path="res://assets/audio/oof.wav" id="5_hurt"]
+[ext_resource type="SpriteFrames" path="res://assets/spawn_in_frames.tres" id="6_spawn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(36, 20)
@@ -19,6 +20,14 @@ texture_filter = 1
 sprite_frames = ExtResource("2_frames")
 animation = &"idle_down"
 offset = Vector2(0, -80)
+
+[node name="SpawnIn" type="AnimatedSprite2D" parent="."]
+visible = false
+z_index = 1
+texture_filter = 1
+sprite_frames = ExtResource("6_spawn")
+animation = &"spawn"
+offset = Vector2(0, -75.5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -2)

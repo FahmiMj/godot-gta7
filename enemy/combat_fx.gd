@@ -87,6 +87,50 @@ static func shockwave(parent: Node, pos: Vector2, radius: float) -> void:
 	burst(parent, pos, Color(0.62, 0.55, 0.45), 26, 0.6, 60.0, 220.0, Vector2.UP, 180.0, 120.0).scale_amount_max = 3.0
 
 
+## A quick additive arc that sweeps in front of a melee swing.
+static func slash(parent: Node, pos: Vector2, direction: Vector2, radius: float,
+		color: Color = Color(0.85, 0.72, 1.0)) -> void:
+	var arc := SlashArc.new()
+	arc.radius = radius
+	arc.direction = direction
+	arc.color = color
+	parent.add_child(arc)
+	arc.global_position = pos
+
+
+## The bright swipe left by a punch: a widening arc that fades in a quarter second.
+class SlashArc extends Node2D:
+	const LIFE: float = 0.24
+	var radius: float = 110.0
+	var direction: Vector2 = Vector2.RIGHT
+	var color: Color = Color(0.85, 0.72, 1.0)
+	var _time: float = 0.0
+
+	func _ready() -> void:
+		z_index = 10
+		rotation = direction.angle()
+		var additive := CanvasItemMaterial.new()
+		additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		material = additive
+
+	func _process(delta: float) -> void:
+		_time += delta
+		if _time >= LIFE:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var k := clampf(_time / LIFE, 0.0, 1.0)
+		var alpha := pow(1.0 - k, 1.5)
+		var spread := lerpf(0.3, 1.15, ease(k, 0.4))
+		var r := radius * lerpf(0.7, 1.0, ease(k, 0.3))
+		draw_arc(Vector2.ZERO, r, -spread, spread, 24,
+				Color(color.r, color.g, color.b, alpha * 0.55), 12.0 * (1.0 - k) + 2.0)
+		draw_arc(Vector2.ZERO, r * 0.9, -spread * 0.85, spread * 0.85, 24,
+				Color(1.0, 0.96, 1.0, alpha * 0.85), 3.0 * (1.0 - k) + 1.0)
+
+
 ## The expanding ground ring of a hammer slam.
 class ShockRing extends Node2D:
 	var radius: float = 120.0

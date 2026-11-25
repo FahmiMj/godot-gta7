@@ -1,8 +1,8 @@
 extends Area2D
 ## Reward dropped when a batch of enemies is cleared.
-## Double-click the chest with the mouse, from anywhere: it bursts open in a golden glow
-## and a healing potion rises out. Double-click the potion to drink it, which restores
-## the player's health to full. Neither click needs the player to be anywhere near.
+## Click the chest with the mouse, from anywhere: it bursts open in a golden glow and a
+## healing potion rises out. Click the potion to drink it, which restores the player's
+## health to full. Neither click needs the player to be anywhere near.
 
 ## Emitted once, when the potion has been drunk.
 signal collected
@@ -11,11 +11,6 @@ signal collected
 ## the potion from the scene (the original health potion) is used.
 var potion_texture: Texture2D
 
-## Two left clicks on the same target within this time count as a double-click.
-const DOUBLE_CLICK_MSEC: int = 400
-## After a double-click, clicks are ignored briefly so a fast triple-click can't both
-## open the chest and drink the potion.
-const LOCKOUT_MSEC: int = 350
 const GLOW: Script = preload("res://enemy/spawn_effect.gd")
 
 @onready var _chest_sprite: Sprite2D = $Sprite2D
@@ -26,9 +21,6 @@ const GLOW: Script = preload("res://enemy/spawn_effect.gd")
 
 var _opened: bool = false
 var _taken: bool = false
-var _last_click_msec: int = -100000
-var _last_click_target: StringName = &""
-var _lockout_until_msec: int = 0
 
 
 func _ready() -> void:
@@ -43,7 +35,7 @@ func _ready() -> void:
 
 
 func _on_click_area_input(_viewport: Node, event: InputEvent, _shape: int, target: StringName) -> void:
-	if _taken or not _is_double_click(event, target):
+	if _taken or not _is_left_click(event):
 		return
 	if target == &"chest" and not _opened:
 		_open() # no distance check: the chest opens remotely, and only once
@@ -51,21 +43,8 @@ func _on_click_area_input(_viewport: Node, event: InputEvent, _shape: int, targe
 		_drink_potion()
 
 
-# Our own timing rather than the OS flag, so it behaves the same everywhere: the second
-# left click on the same target within DOUBLE_CLICK_MSEC counts, then clicks are
-# ignored for LOCKOUT_MSEC.
-func _is_double_click(event: InputEvent, target: StringName) -> bool:
-	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
-		return false
-	var now := Time.get_ticks_msec()
-	if now < _lockout_until_msec:
-		return false
-	var is_second := target == _last_click_target and now - _last_click_msec <= DOUBLE_CLICK_MSEC
-	_last_click_target = &"" if is_second else target
-	_last_click_msec = now
-	if is_second:
-		_lockout_until_msec = now + LOCKOUT_MSEC
-	return is_second
+func _is_left_click(event: InputEvent) -> bool:
+	return event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
 
 
 func _open() -> void:
@@ -172,6 +151,6 @@ func _sparkles(amount: int, life: float, burst: float, v_min: float, v_max: floa
 
 func _update_prompt() -> void:
 	_prompt.visible = not _taken
-	_prompt.text = "Double-click the potion" if _opened else "Double-click to open"
+	_prompt.text = "Click the potion" if _opened else "Click to open"
 	_prompt.reset_size()
 	_prompt.position.x = -_prompt.size.x * _prompt.scale.x / 2.0

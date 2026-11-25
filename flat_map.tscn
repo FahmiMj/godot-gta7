@@ -472,7 +472,7 @@ texture_filter = 1
 offset_left = 12.0
 offset_top = 84.0
 offset_right = 140.0
-offset_bottom = 160.0
+offset_bottom = 224.0
 
 [node name="VBox" type="VBoxContainer" parent="DebugUI/Panel"]
 theme_override_constants/separation = 2
@@ -488,3 +488,11 @@ text = "Revive"
 [node name="ManaButton" type="Button" parent="DebugUI/Panel/VBox"]
 theme_override_font_sizes/font_size = 11
 text = "Add 10 Mana"
+
+[node name="EndlessButton" type="Button" parent="DebugUI/Panel/VBox"]
+theme_override_font_sizes/font_size = 11
+text = "Endless Mode"
+
+[node name="UnlockAllButton" type="Button" parent="DebugUI/Panel/VBox"]
+theme_override_font_sizes/font_size = 11
+text = "Unlock All Attacks"

@@ -1,12 +1,12 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://dn2nnjadr2oev"]
 
 [ext_resource type="Texture2D" uid="uid://dtpmsjljmqblo" path="res://assets/sprites/dark_fire_cast_frames.png" id="1_f28mp"]
-[ext_resource type="Texture2D" path="res://assets/sprites/attacks/attack_down.png" id="1_nsio6"]
+[ext_resource type="Texture2D" uid="uid://drhhevyfq4jgk" path="res://assets/sprites/attacks/attack_down.png" id="1_nsio6"]
 [ext_resource type="Texture2D" uid="uid://bg1erbw8fpso4" path="res://assets/sprites/player_sheet.png" id="1_w1ope"]
-[ext_resource type="Texture2D" path="res://assets/sprites/attacks/attack_left.png" id="2_bhnln"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player_wither_sheet.png" id="2_wither"]
-[ext_resource type="Texture2D" path="res://assets/sprites/attacks/attack_right.png" id="3_j1r6p"]
-[ext_resource type="Texture2D" path="res://assets/sprites/attacks/attack_up.png" id="4_cgsta"]
+[ext_resource type="Texture2D" uid="uid://cr3jbxegqdpvw" path="res://assets/sprites/attacks/attack_left.png" id="2_bhnln"]
+[ext_resource type="Texture2D" uid="uid://bhirjxp3cum3a" path="res://assets/sprites/player_wither_sheet.png" id="2_wither"]
+[ext_resource type="Texture2D" uid="uid://bkbfptwpqj804" path="res://assets/sprites/attacks/attack_right.png" id="3_j1r6p"]
+[ext_resource type="Texture2D" uid="uid://ghfr8hf84eb4" path="res://assets/sprites/attacks/attack_up.png" id="4_cgsta"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3kra1"]
 atlas = ExtResource("1_nsio6")

@@ -30,10 +30,9 @@ static var _slots_updated: int = -1000000
 @export var speed: float = 130.0
 @export var max_health: int = 30
 @export var points: int = 5
-## Sight radius. Far wider than the arena, so an enemy that has spawned locks on
-## and comes for the player instead of idling out of range. Kept from the
-## kill-enemies fix: with this the idle taunts below rarely play.
-@export var detection_range: float = 2000.0
+## Sight radius. Larger than the arena, so every enemy locks on as soon as it
+## spawns and stays aggravated for the whole wave.
+@export var detection_range: float = 100000.0
 @export var attack_range: float = 128.0
 @export var attack_damage: int = 10
 @export var attack_cooldown: float = 1.0
@@ -184,14 +183,25 @@ func _can_stun() -> bool:
 	return true
 
 
+## Public entry for the Hero's attacks: shove the enemy away from `from` and stun it.
+## Does nothing while it is dead, still spawning, or inside its stun immunity window.
+func stagger(from: Vector2, force: float = 150.0) -> void:
+	if is_dead or _spawning or _stun_immune_left > 0.0 or not _can_stun():
+		return
+	var away := global_position - from
+	if away.length_squared() < 0.01:
+		away = Vector2.UP
+	_begin_stun(away.normalized(), force)
+
+
 # A hit freezes the enemy for a moment and pushes it back; whatever it was doing is
 # cancelled, and normal behaviour resumes by itself when the stun runs out.
-func _begin_stun(away: Vector2) -> void:
+func _begin_stun(away: Vector2, force: float = 150.0) -> void:
 	_cancel_actions()
 	_reset_taunt()
 	_stun_left = stun_time
 	_stun_immune_left = stun_time + stun_immunity
-	_knockback = away * 150.0
+	_knockback = away * force
 	_set_state(STATE_STUN)
 	_sprite.play("hurt")
 	_sprite.offset = Vector2.ZERO
